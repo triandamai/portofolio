@@ -16,5 +16,5 @@
 		on:minimize={()=>{}}
 		on:maximize={()=>{}}
 	/>
-	<p>Notes app</p>
+	<p class="font-sfbold">Notes app</p>
 </Cupertino>
