@@ -328,6 +328,11 @@ export default {
         '"Courier New"',
         'monospace',
       ],
+      sfbold: "sfbold",
+      sflight: "sflight",
+      sfmedium: "sfmedium",
+      sfregular: "sfregular",
+      sfsemibold: "sfsemibold",
     },
     fontSize: {
       xs: ['0.75rem', { lineHeight: '1rem' }],

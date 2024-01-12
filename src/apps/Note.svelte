@@ -54,7 +54,7 @@
 			{/each}
 
 		</div>
-		<div class="w-full h-full p-2">
+		<div class="w-full h-full p-2  font-primary">
 			<p>sa</p>
 		</div>
 	</div>

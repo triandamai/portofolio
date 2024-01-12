@@ -1,3 +1,24 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@font-face {
+  font-family: sfbold;
+  src: url("lib/fonts/sanfrancisco-bold.otf") format("opentype");
+}
+@font-face {
+  font-family: sflight;
+  src: url("lib/fonts/sanfrancisco-Light.otf") format("opentype");
+}
+@font-face {
+  font-family: sfregular;
+  src: url("lib/fonts/sanfrancisco-Regular.otf") format("opentype");
+}
+@font-face {
+  font-family: sfmedium;
+  src: url("lib/fonts/sanfrancisco-Medium.otf") format("opentype");
+}
+@font-face {
+  font-family: sfsemibold;
+  src: url("lib/fonts/sanfrancisco-Semibold.otf") format("opentype");
+}
