@@ -31,7 +31,7 @@
 <div
 	id={application_id}
 	bind:this={app}
-	class="backdrop-blur-lg bg-white/30 absolute shadow-2xl rounded-md"
+	class="backdrop-blur-[500px] bg-white/40 absolute shadow-2xl rounded-md"
 	style="width: {width}px; height: {height}px;"
 >
 	<slot />

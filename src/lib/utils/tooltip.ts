@@ -1,5 +1,5 @@
 import type { ActionReturn } from 'svelte/action';
-import Tooltip from '../components/Tooltip.svelte';
+import Tooltip from '../../components/Tooltip.svelte';
 import type { ComponentType } from 'svelte';
 
 export function tooltip(

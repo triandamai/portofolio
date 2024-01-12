@@ -3,22 +3,22 @@
 @tailwind utilities;
 
 @font-face {
-  font-family: sfbold;
+  font-family: sf-bold;
   src: url("lib/fonts/sanfrancisco-bold.otf") format("opentype");
 }
 @font-face {
-  font-family: sflight;
+  font-family: sf-light;
   src: url("lib/fonts/sanfrancisco-Light.otf") format("opentype");
 }
 @font-face {
-  font-family: sfregular;
+  font-family: sf-regular;
   src: url("lib/fonts/sanfrancisco-Regular.otf") format("opentype");
 }
 @font-face {
-  font-family: sfmedium;
+  font-family: sf-medium;
   src: url("lib/fonts/sanfrancisco-Medium.otf") format("opentype");
 }
 @font-face {
-  font-family: sfsemibold;
+  font-family: sf-semibold;
   src: url("lib/fonts/sanfrancisco-Semibold.otf") format("opentype");
 }

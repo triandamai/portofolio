@@ -2,12 +2,12 @@
 	import Cupertino from '../components/framework/Cupertino.svelte';
 	import TrafficLight from '../components/systemUI/TrafficLight.svelte';
 	import { createEventDispatcher } from 'svelte';
-
 	const dispatcher = createEventDispatcher();
 
 </script>
 
-<Cupertino on:down={()=>{
+<Cupertino
+	on:down={()=>{
 	dispatcher("headerDown",{})
 }}>
 	<TrafficLight
@@ -16,5 +16,9 @@
 		on:minimize={()=>{}}
 		on:maximize={()=>{}}
 	/>
-	<p>Finder app</p>
+	<div class="h-full px-2 overflow-y-scroll">
+		{#each Array(30) as _, i}
+			<p class="font-sf-regular">Finder app</p>
+		{/each}
+	</div>
 </Cupertino>

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { interpolate } from 'popmotion';
 	import { spring } from 'svelte/motion';
+	import {tooltip} from '$lib/utils/tooltip';
 	import ButtonBase from './ButtonBase.svelte';
 	import { browser } from '$app/environment';
 
@@ -81,6 +82,7 @@
 <section>
 	<ButtonBase class="dock-button">
 		<img
+			use:tooltip={appID}
 			bind:this={el}
 			class="app-icon"
 			src="/app-icons/{appID}/256.png"

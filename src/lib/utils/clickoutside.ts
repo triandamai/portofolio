@@ -4,11 +4,11 @@ export function clickOutside(node: HTMLElement, options: { callback: () => void 
 		if (!node.contains(e.target as HTMLElement)) options.callback();
 	};
 
-	document.addEventListener('click', handleClick, true);
+	document.addEventListener('mousedown', handleClick, true);
 
 	return {
 		destroy() {
-			document.removeEventListener('click', handleClick, true);
+			document.removeEventListener('mousedown', handleClick, true);
 		},
 	};
 }

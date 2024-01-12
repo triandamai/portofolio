@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { autoPlacement, computePosition, flip, offset, shift } from '@floating-ui/dom';
-	import { createEventDispatcher, onMount, type ComponentType } from 'svelte';
+	import { computePosition, flip, offset, shift } from '@floating-ui/dom';
+	import { type ComponentType, createEventDispatcher, onMount } from 'svelte';
 
 	export let componentOrString: ComponentType | string;
 	export let parent: HTMLElement | SVGSVGElement;
