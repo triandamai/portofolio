@@ -4,10 +4,7 @@ import { createEventDispatcher } from 'svelte';
 const dispatcher = createEventDispatcher()
 </script>
 <svg
-	on:click={()=>{
-		console.log("ee")
-		dispatcher("down",{})
-	}}
+	on:click={()=>{dispatcher("down",{})}}
 	xmlns="http://www.w3.org/2000/svg"
 	xmlns:xlink="http://www.w3.org/1999/xlink"
 	viewBox="0,0,256,256" class="place-self-center h-4 mx-2">

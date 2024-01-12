@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import DesktopContainer from '../../components/systemUI/DesktopContainer.svelte';
+	import DesktopContainer from '../../components/systemUI/window/DesktopContainer.svelte';
 	import { browser } from '$app/environment';
 	import Statusbar from '../../components/systemUI/Statusbar.svelte';
 	import {
@@ -10,20 +10,22 @@
 		systemContext
 	} from '$lib/manifest/application.manifest';
 	import Dock from '../../components/systemUI/dock/Dock.svelte';
-	import MenuContext from '../../components/systemUI/menuContext/MenuContext.svelte';
+	import MenuContext from '../../components/framework/MenuContext.svelte';
+	import MenuContextItem from '../../components/framework/MenuContextItem.svelte';
+	import DesktopContext from '../../components/systemUI/context/DesktopContext.svelte';
+	import { normalizeZIndex } from '../../components/systemUI/window/window';
 
-
+	let dock: HTMLDivElement;
 	let statusBar: HTMLDivElement;
 	let statusBarMenuContext: MenuContext;
-	let dock: HTMLDivElement;
+	let currentStatusbarMenuContext: Array<OptionsMenu> = systemContext;
 
-	let bottomStatusBarOffset: number = 0;
-	let currentContextMenu: Array<OptionsMenu> = systemContext;
-
+	let maxYOffset: number = 0;
 	let moving: boolean = false;
 	let oldY: number = 0;
 	let y: number = 300;
 	let x: number = 100;
+
 	let current_active_app: Application | null = null;
 
 	async function loadComponent(componentName: string) {
@@ -37,30 +39,16 @@
 				y = component.offsetTop;
 				x = component.offsetLeft;
 			}
-			moveToTop(name);
+			normalizeZIndex(applications,name);
 		}
 	}
-
-	function moveToTop(name: string) {
-		applications.forEach((app) => {
-			let component = document.getElementById(app.appID);
-			if (component) {
-				if (name == app.appID) {
-					component.style.zIndex = `1`;
-				} else {
-					component.style.zIndex = `0`;
-				}
-			}
-		});
-	}
-
 
 	function moveApp(_: HTMLElement) {
 		window.addEventListener('mousemove', (e) => {
 			if (moving && e.offsetX > 1) {
 				if (e.pageY < oldY) {
 					//top
-					if (y > bottomStatusBarOffset && e.clientY > bottomStatusBarOffset) {
+					if (y > maxYOffset && e.clientY > maxYOffset) {
 						x += e.movementX;
 						y += e.movementY;
 					}
@@ -80,23 +68,28 @@
 
 	onMount(() => {
 		//initialize default y position for apps
-		bottomStatusBarOffset = (statusBar.offsetHeight + statusBar.offsetTop);
-		y = bottomStatusBarOffset;
+		maxYOffset = (statusBar.offsetHeight + statusBar.offsetTop);
+		y = maxYOffset;
 
 	});
 </script>
 
+<DesktopContext/>
 <div class="main-layout w-screen h-screen relative">
-	<MenuContext bind:this={statusBarMenuContext}>
-		{#each currentContextMenu as context }
-			{#if context.type === 'button'}
-				<button on:click={()=>{
+	<MenuContext
+		bind:this={statusBarMenuContext}
+		on:clickOutside={({detail})=>{
+			detail()
+		}}
+	>
+		{#each currentStatusbarMenuContext as context }
+			<MenuContextItem
+				type={context.type}
+				name={context.name}
+				on:itemClick={({detail})=>{
 					statusBarMenuContext.hide()
 				}}
-								class="font-sf-regular text-start text-gray-900 text-sm pr-16 pl-2 rounded-md py-0.5 hover:bg-blue-500 hover:text-white">{context.name}</button>
-			{:else }
-				<div class="h-[0.05rem] w-full bg-gray-500 rounded-md my-0.5" />
-			{/if}
+			/>
 		{/each}
 	</MenuContext>
 
@@ -106,7 +99,7 @@
 			systemContextMenu={systemContext}
 			systemToolbarMenu={menu_toolbar_system}
 			on:showMenuContext={({detail})=>{
-				currentContextMenu = detail.contextMenu
+				currentStatusbarMenuContext = detail.contextMenu
 				statusBarMenuContext.show(detail.x,detail.y)
 			}}
 			on:hideMenuContext={()=>{
@@ -129,7 +122,7 @@
 						height={manifest.component.height}
 						on:down={()=>{
 							current_active_app = manifest
-							moveToTop(current_active_app?.appID)
+							normalizeZIndex(applications,current_active_app?.appID)
 					}}
 					>
 						<svelte:component

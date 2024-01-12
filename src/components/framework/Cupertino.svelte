@@ -2,41 +2,40 @@
 	import { createEventDispatcher, onMount } from 'svelte';
 
 	export let style: 'basic' | 'basic-sidebar' = 'basic';
-	let appbar: HTMLDivElement;
-	let header: HTMLDivElement;
-	let cupertino: HTMLDivElement;
-	let contextHeight: number = 0;
+	let appbar: HTMLDivElement | undefined;
+	let header: HTMLDivElement | undefined;
+	let cupertino: HTMLDivElement | undefined;
+	let body: HTMLDivElement | undefined;
 	let headerHeight: number = 50;
+	let bodyHeight: number = 0;
 	let dispatcher = createEventDispatcher();
 	onMount(() => {
-		appbar.addEventListener('mousedown', () => {
+		appbar?.addEventListener('mousedown', () => {
 			dispatcher('down', {});
 		});
-		if (header) {
-			header.addEventListener('mousedown', () => {
-				dispatcher('down', {});
-			});
-
-		}
-		contextHeight = cupertino.clientHeight - headerHeight;
+		header?.addEventListener('mousedown', () => {
+			dispatcher('down', {});
+		});
+		bodyHeight = (cupertino.clientHeight - headerHeight);
 	});
 </script>
 <div bind:this={cupertino} class="w-full h-full relative">
 	{#if style === 'basic'}
-		<div bind:this={appbar} class="w-full select-none" style="height: {headerHeight}px;">
+		<!--	appbar	-->
+		<div bind:this={appbar} style="height: {headerHeight}px;" class="w-full select-none">
 			<slot name="appbar" />
 		</div>
-		<div class="w-full h-max select-none" style="height: {contextHeight}px;">
+		<div bind:this={body} style="height: {bodyHeight}px;" class="w-full h-max select-none">
 			<slot />
 		</div>
 	{:else if style === 'basic-sidebar'}
 		<div class="w-full h-full flex flex-row">
 			<!--			sidebar 		-->
 			<div class="w-1/4 flex flex-col text-sm font-sf-bold">
-				<div bind:this={appbar} class="place-content-center select-none" style="height: {headerHeight}px">
+				<div bind:this={appbar} style="height: {headerHeight}px;" class="place-content-center select-none">
 					<slot name="appbar" />
 				</div>
-				<div class="overflow-y-hidden font-sf-bold text-gray-500 select-none" style="height: {contextHeight}px;">
+				<div style="height: {bodyHeight}px;" class="overflow-y-hidden font-sf-bold text-gray-500 select-none">
 					<slot name="sidebar">
 						<p>sidebar</p>
 					</slot>
@@ -44,12 +43,13 @@
 			</div>
 			<!--			context		-->
 			<div class="w-full flex flex-col">
-				<div class="w-full text-sm font-sf-bold place-content-center select-none" bind:this={header} style="height: {headerHeight}px">
+				<div bind:this={header} style="height: {headerHeight}px;"
+						 class="w-full text-sm font-sf-bold place-content-center select-none">
 					<slot name="header">
 						<p>header</p>
 					</slot>
 				</div>
-				<div class="w-full select-none" style="height: {contextHeight}px;">
+				<div bind:this={body} style="height: {bodyHeight}px;" class="w-full select-none">
 					<slot>
 						<p>content</p>
 					</slot>
