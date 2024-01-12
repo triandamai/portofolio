@@ -63,9 +63,8 @@
 
 		<Window
 			on:onItemDock={({ detail }) => {
-		console.log(detail)
-	}}
-		>
+				console.log(detail)
+			}}>
 			<Draggable
 				xtop={movingTop}
 				yleft={movingLeft}
