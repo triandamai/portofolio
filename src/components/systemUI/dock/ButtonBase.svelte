@@ -1,4 +1,9 @@
-<button {...$$props}>
+<script lang="ts">
+	import { createEventDispatcher } from 'svelte';
+
+	const dispatcher = createEventDispatcher()
+</script>
+<button on:click={()=>dispatcher("click",{})} {...$$props}>
 	<slot />
 </button>
 

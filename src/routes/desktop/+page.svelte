@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import DesktopContainer from '../../components/systemUI/window/DesktopContainer.svelte';
 	import { browser } from '$app/environment';
-	import Statusbar from '../../components/systemUI/Statusbar.svelte';
+	import { normalizeZIndex } from '../../components/systemUI/window/window';
+	import { fly } from 'svelte/transition';
 	import {
 		type Application,
 		applications,
@@ -13,12 +13,16 @@
 	import MenuContext from '../../components/framework/MenuContext.svelte';
 	import MenuContextItem from '../../components/framework/MenuContextItem.svelte';
 	import DesktopContext from '../../components/systemUI/context/DesktopContext.svelte';
-	import { normalizeZIndex } from '../../components/systemUI/window/window';
+	import Statusbar from '../../components/systemUI/statusbar/Statusbar.svelte';
+	import DesktopContainer from '../../components/systemUI/window/DesktopContainer.svelte';
+	import Launchpad from '../../components/systemUI/launchpad/Launchpad.svelte';
 
-	let dock: HTMLDivElement;
-	let statusBar: HTMLDivElement;
+
+	let statusBar: Statusbar;
 	let statusBarMenuContext: MenuContext;
 	let currentStatusbarMenuContext: Array<OptionsMenu> = systemContext;
+
+	let launchpad: Launchpad;
 
 	let maxYOffset: number = 0;
 	let moving: boolean = false;
@@ -32,6 +36,16 @@
 		return await import(`../../applications/${componentName}.svelte`);
 	}
 
+	function showLaunchPad({detail}){
+		statusBar.hide()
+		launchpad.show()
+	}
+
+	function hideLaunchpad(){
+		launchpad.hide()
+		statusBar.show()
+	}
+
 	function getCurrentPosition(name: string) {
 		if (browser) {
 			let component = document.getElementById(name);
@@ -39,7 +53,7 @@
 				y = component.offsetTop;
 				x = component.offsetLeft;
 			}
-			normalizeZIndex(applications,name);
+			normalizeZIndex(applications, name);
 		}
 	}
 
@@ -68,45 +82,53 @@
 
 	onMount(() => {
 		//initialize default y position for apps
-		maxYOffset = (statusBar.offsetHeight + statusBar.offsetTop);
-		y = maxYOffset;
-
+		if (statusBar) {
+			const statusbarInfo = statusBar.getStatusbarInfo();
+			maxYOffset = (statusbarInfo.height + statusbarInfo.x);
+			y = maxYOffset;
+		}
 	});
 </script>
 
-<DesktopContext/>
-<div class="main-layout w-screen h-screen relative">
-	<MenuContext
-		bind:this={statusBarMenuContext}
-		on:clickOutside={({detail})=>{
+<DesktopContext />
+<MenuContext
+	bind:this={statusBarMenuContext}
+	on:clickOutside={({detail})=>{
 			detail()
 		}}
-	>
-		{#each currentStatusbarMenuContext as context }
-			<MenuContextItem
-				type={context.type}
-				name={context.name}
-				on:itemClick={({detail})=>{
+>
+	{#each currentStatusbarMenuContext as context }
+		<MenuContextItem
+			type={context.type}
+			name={context.name}
+			on:itemClick={()=>{
 					statusBarMenuContext.hide()
 				}}
-			/>
-		{/each}
-	</MenuContext>
-
-	<div bind:this={statusBar} class="fixed z-10 h-7 w-screen top-0 left-0 shadow-2xl blur-0">
-		<Statusbar
-			applicationContext={current_active_app}
-			systemContextMenu={systemContext}
-			systemToolbarMenu={menu_toolbar_system}
-			on:showMenuContext={({detail})=>{
-				currentStatusbarMenuContext = detail.contextMenu
-				statusBarMenuContext.show(detail.x,detail.y)
-			}}
-			on:hideMenuContext={()=>{
-				statusBarMenuContext.hide()
-			}}
 		/>
-	</div>
+	{/each}
+</MenuContext>
+<div
+	in:fly={{ x: -200, duration: 300, delay: 1000 }}
+	out:fly={{ x: 200, duration: 300 }}
+	class="main-layout w-screen h-screen relative">
+	<Launchpad
+		bind:this={launchpad}
+		on:clickOutside={({detail})=>{
+			hideLaunchpad()
+			detail()
+		}}
+	/>
+	<Statusbar
+		bind:this={statusBar}
+		applicationContext={current_active_app}
+		systemContextMenu={systemContext}
+		systemToolbarMenu={menu_toolbar_system}
+		on:showMenuContext={({detail})=>{
+			currentStatusbarMenuContext = detail.contextMenu
+			statusBarMenuContext.show(detail.x,detail.y)
+		}}
+	/>
+
 	<div
 		use:moveApp
 		class="z-0 flex flex-col justify-between h-screen">
@@ -138,12 +160,9 @@
 			{/await}
 		{/each}
 	</div>
-	<div
-		bind:this={dock}
-		id="dock"
-		class="fixed bottom-0 z-10 h-10 w-screen flex flex-row">
-		<Dock />
-	</div>
+	<Dock
+		on:click={showLaunchPad}
+	/>
 </div>
 
 <style>

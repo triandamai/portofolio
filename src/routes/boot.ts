@@ -57,6 +57,7 @@ function run() {
 				y: 0,
 				useDefaultPlatform: true
 			}),
+			openWhenStarting:false,
 			options: createOptionsMenu(
 				['About Finder'], ['Settings...'], ['Hide Finder', 'Close Finder']
 			)
@@ -76,6 +77,7 @@ function run() {
 				y: 0,
 				useDefaultPlatform: true
 			}),
+			openWhenStarting:false,
 			options: createOptionsMenu(
 				['About Notes'], ['Settings...'], ['Hide Note', 'Close Note']
 			)

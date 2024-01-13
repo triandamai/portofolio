@@ -100,6 +100,7 @@ function createAppConfig(
 		appName: string,
 		author: string,
 		component: Window,
+		openWhenStarting:boolean,
 		options: Array<OptionsMenu>
 	}
 ) {
@@ -108,7 +109,7 @@ function createAppConfig(
 		appID: config.appID,
 		author: config.author,
 		component: config.component,
-		state: 'open',
+		state: config.openWhenStarting ? 'open': 'close',
 		options: [...config.options]
 	};
 	applications.push(app);

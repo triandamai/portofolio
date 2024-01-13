@@ -4,6 +4,7 @@
 	import {tooltip} from '$lib/utils/tooltip';
 	import ButtonBase from './ButtonBase.svelte';
 	import { browser } from '$app/environment';
+	import { createEventDispatcher } from 'svelte';
 
 	/** Block 1 */
 
@@ -11,6 +12,7 @@
 	export let mouseX: number | null;
 
 	let el: HTMLImageElement;
+	const dispatcher = createEventDispatcher()
 
 	/** Block 2 */
 
@@ -80,7 +82,11 @@
 </script>
 
 <section>
-	<ButtonBase class="dock-button">
+	<ButtonBase
+		on:click={()=>{
+			dispatcher("click")
+		}}
+		class="dock-button">
 		<img
 			use:tooltip={appID}
 			bind:this={el}

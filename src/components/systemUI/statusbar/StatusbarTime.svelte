@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { format } from 'date-fns';
-	import { createIntervalStore } from '../../store/interval.store';
+	import { createIntervalStore } from '../../../store/interval.store';
 
 
 	const time = createIntervalStore(1000);

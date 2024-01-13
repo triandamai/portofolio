@@ -1,31 +1,63 @@
 <script lang="ts">
 	import DockItem from './DockItem.svelte';
+	import { createEventDispatcher } from 'svelte';
+	import type { Application } from '$lib/manifest/application.manifest';
+	const dispatcher = createEventDispatcher()
 
-	let apps = [
+	// export let apps:Array<Application> = []
+	let pinnedApps =[
 		'finder',
+		'launchpad',
 		'divider',
+	]
+	let apps = [
 		'notes',
-		"appstore",
-		"calculator",
-		"launchpad"
+		'appstore',
+		'calculator'
 	];
 
 	let mouseX: number | null = null;
 
 </script>
-<div class="dock-container">
-	<div
-		class="dock-el rounded-lg backdrop-blur-md bg-white/30"
-		on:mousemove={(event)=>(mouseX = event.x)}
-		on:mouseleave={()=>(mouseX = null)}
-	>
-		{#each apps as app}
-			{#if app === 'divider'}
-				<div class="divider bg-gray-900" aria-hidden="true" />
-			{:else }
-				<DockItem mouseX={mouseX} appID={app} />
-			{/if}
-		{/each}
+<div
+	class="fixed bottom-0 z-10 h-10 w-screen flex flex-row">
+	<div class="dock-container">
+		<div
+			class="dock-el rounded-lg backdrop-blur-md bg-white/30"
+			on:mousemove={(event)=>(mouseX = event.x)}
+			on:mouseleave={()=>(mouseX = null)}
+		>
+			{#each pinnedApps as app}
+				{#if app === 'divider'}
+					<div class="divider bg-gray-900" aria-hidden="true" />
+				{:else }
+					<DockItem
+						mouseX={mouseX}
+						appID={app}
+						on:click={()=>{
+							dispatcher("click",{
+								id:app
+							})
+						}}
+					/>
+				{/if}
+			{/each}
+			{#each apps as app}
+				{#if app === 'divider'}
+					<div class="divider bg-gray-900" aria-hidden="true" />
+				{:else }
+					<DockItem
+						mouseX={mouseX}
+						appID={app}
+						on:click={()=>{
+							dispatcher("click",{
+								id:app
+							})
+						}}
+					/>
+				{/if}
+			{/each}
+		</div>
 	</div>
 </div>
 <style lang="scss">
@@ -46,8 +78,8 @@
   }
 
   .dock-el {
-    box-shadow: inset 0 0 0 0.2px rgb(245 245 245 / 70%),
-    hsla(0, 0%, 0%, 0.3) 2px 5px 19px 7px;
+    box-shadow: inset 0 0 0 0.2px rgba(93, 90, 90, 0.27),
+    hsla(0, 0%, 0%, 0.11) 2px 5px 19px 7px;
 
     padding: 0.3rem;
 
@@ -56,6 +88,7 @@
     display: flex;
     align-items: flex-end;
   }
+
   .divider {
     height: 100%;
     width: 0.2px;
