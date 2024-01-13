@@ -1,3 +1,4 @@
+const docked_app = ['finder', 'launchpad', 'settings'];
 const applications: Array<Application> = [];
 const menu_toolbar_system: Array<SystemToolbarMenu> = [];
 const systemContext: Array<OptionsMenu> = [
@@ -46,7 +47,13 @@ const systemContext: Array<OptionsMenu> = [
 		type: 'button'
 	}];
 
-
+export type ApplicationState = {
+	z: number,
+	context: Application,
+	state: 'open' | 'close' | 'idle',
+	x:number,
+	y:number
+}
 export type SystemToolbarMenu = {
 	name: string;
 	contextMenu: Array<OptionsMenu>
@@ -69,8 +76,9 @@ export type Application = {
 	author: string,
 	appID: string,
 	component: Window,
-	state: 'open' | 'close' | 'quit',
-	options: Array<OptionsMenu>
+	state: 'open' | 'quit',
+	options: Array<OptionsMenu>,
+	isDocked: boolean
 }
 
 function createOptionsMenu(...options: Array<Array<string>>): Array<OptionsMenu> {
@@ -100,17 +108,19 @@ function createAppConfig(
 		appName: string,
 		author: string,
 		component: Window,
-		openWhenStarting:boolean,
+		openWhenStarting: boolean,
 		options: Array<OptionsMenu>
 	}
 ) {
+
 	const app: Application = {
 		name: config.appName,
 		appID: config.appID,
 		author: config.author,
 		component: config.component,
-		state: config.openWhenStarting ? 'open': 'close',
-		options: [...config.options]
+		state: config.openWhenStarting ? 'open' : 'quit',
+		options: [...config.options],
+		isDocked: docked_app.includes(config.appID)
 	};
 	applications.push(app);
 }

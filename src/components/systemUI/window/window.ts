@@ -1,14 +1,13 @@
-import type { Application } from '$lib/manifest/application.manifest';
+import type { ApplicationState } from '$lib/manifest/application.manifest';
 
-
-export function normalizeZIndex(applications:Array<Application>, name: string) {
+export function updateElementZ(applications: Array<ApplicationState>) {
 	applications.forEach((app) => {
-		let component = document.getElementById(app.appID);
+		let component = document.getElementById(app.context.appID);
 		if (component) {
-			if (name == app.appID) {
-				component.style.zIndex = `1`;
-			} else {
+			if (app.z < 0) {
 				component.style.zIndex = `0`;
+			} else {
+				component.style.zIndex = `${app.z}`;
 			}
 		}
 	});

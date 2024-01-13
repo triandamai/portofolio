@@ -2,8 +2,10 @@
 	import { createEventDispatcher } from 'svelte';
 
 	const dispatcher = createEventDispatcher()
+
+	export let id:string = ''
 </script>
-<button on:click={()=>dispatcher("click",{})} {...$$props}>
+<button id={id} on:click={()=>dispatcher("click",{})} {...$$props}>
 	<slot />
 </button>
 

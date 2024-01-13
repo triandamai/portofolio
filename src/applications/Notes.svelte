@@ -13,9 +13,15 @@
 }}>
 	<TrafficLight
 		slot="appbar"
-		on:close={()=>{}}
-		on:minimize={()=>{}}
-		on:maximize={()=>{}}
+		on:close={()=>{
+			dispatcher('close', {})
+		}}
+		on:minimize={()=>{
+			dispatcher('minimize', {})
+		}}
+		on:maximize={()=>{
+			dispatcher('maximize', {})
+		}}
 	/>
 
 	<div

@@ -12,9 +12,15 @@
 }}>
 	<TrafficLight
 		slot="appbar"
-		on:close={()=>{}}
-		on:minimize={()=>{}}
-		on:maximize={()=>{}}
+		on:close={()=>{
+			dispatcher('close', {})
+		}}
+		on:minimize={()=>{
+			dispatcher('minimize', {})
+		}}
+		on:maximize={()=>{
+			dispatcher('maximize', {})
+		}}
 	/>
 	<div class="h-full px-2 overflow-y-scroll">
 		{#each Array(30) as _, i}

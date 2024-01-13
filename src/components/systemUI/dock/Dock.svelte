@@ -2,21 +2,17 @@
 	import DockItem from './DockItem.svelte';
 	import { createEventDispatcher } from 'svelte';
 	import type { Application } from '$lib/manifest/application.manifest';
-	const dispatcher = createEventDispatcher()
 
-	// export let apps:Array<Application> = []
-	let pinnedApps =[
-		'finder',
-		'launchpad',
-		'divider',
-	]
-	let apps = [
-		'notes',
-		'appstore',
-		'calculator'
-	];
+	const dispatcher = createEventDispatcher();
 
+	export let activeApplication: Array<Application> = [];
 	let mouseX: number | null = null;
+
+	function onItemClick(appID: string) {
+		dispatcher('click', {
+			appID: appID
+		});
+	}
 
 </script>
 <div
@@ -27,33 +23,27 @@
 			on:mousemove={(event)=>(mouseX = event.x)}
 			on:mouseleave={()=>(mouseX = null)}
 		>
-			{#each pinnedApps as app}
-				{#if app === 'divider'}
+			<DockItem
+				mouseX={mouseX}
+				appID="launchpad"
+				on:click={()=>{onItemClick('launchpad')}}
+			/>
+			<DockItem
+				mouseX={mouseX}
+				appID="finder"
+				on:click={()=>{onItemClick('finder')}}
+			/>
+			<div class="divider bg-gray-900" aria-hidden="true" />
+			{#each activeApplication as app}
+				{#if app.appID === 'divider'}
 					<div class="divider bg-gray-900" aria-hidden="true" />
+				{:else if app.appID === 'finder'}
+				<!--	do nothin-->
 				{:else }
 					<DockItem
 						mouseX={mouseX}
-						appID={app}
-						on:click={()=>{
-							dispatcher("click",{
-								id:app
-							})
-						}}
-					/>
-				{/if}
-			{/each}
-			{#each apps as app}
-				{#if app === 'divider'}
-					<div class="divider bg-gray-900" aria-hidden="true" />
-				{:else }
-					<DockItem
-						mouseX={mouseX}
-						appID={app}
-						on:click={()=>{
-							dispatcher("click",{
-								id:app
-							})
-						}}
+						appID={app.appID}
+						on:click={()=>{onItemClick(app.appID)}}
 					/>
 				{/if}
 			{/each}
