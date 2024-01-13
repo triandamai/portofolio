@@ -39,9 +39,9 @@
 
 
 	function onMinimizeApp(idx: number, detail: Application) {
-		let findIndex = stateActiveApp.map(v=>v.context.appID).indexOf(detail.appID)
-		stateActiveApp[findIndex].state = 'idle'
-		stateActiveApp = stateActiveApp
+		let findIndex = stateActiveApp.map(v => v.context.appID).indexOf(detail.appID);
+		stateActiveApp[findIndex].state = 'idle';
+		stateActiveApp = stateActiveApp;
 	}
 
 	function onMaximizeApp(idx: number, detail: Application) {
@@ -49,7 +49,7 @@
 	}
 
 	function onCloseApp(idx: number, detail: Application) {
-		let findIndex = stateActiveApp.map(v=>v.context.appID).indexOf(detail.appID)
+		let findIndex = stateActiveApp.map(v => v.context.appID).indexOf(detail.appID);
 		stateActiveApp.splice(findIndex, 1);
 		stateActiveApp = stateActiveApp;
 	}
@@ -83,10 +83,10 @@
 				//insert from applications to active
 				let findAppFromList = applications.find((v) => v.appID === detail.appID);
 				let prevData = stateActiveApp;
-				const index=() =>{
-					if(stateActiveApp.length < 0) return 1
-					else return stateActiveApp.length
-				}
+				const index = () => {
+					if (stateActiveApp.length < 0) return 1;
+					else return stateActiveApp.length;
+				};
 				prevData.push({
 					state: 'open',
 					context: findAppFromList,
@@ -100,7 +100,7 @@
 				stateActiveApp = stateActiveApp;
 			}
 		}
-		updateElementZ(stateActiveApp)
+		updateElementZ(stateActiveApp);
 	}
 
 	function hideLaunchpad() {
@@ -116,7 +116,7 @@
 				x = component.offsetLeft;
 			}
 		}
-		onAppIconClick({detail:{appID:appID}})
+		onAppIconClick({ detail: { appID: appID } });
 	}
 
 	function moveApp(_: HTMLElement) {
@@ -237,7 +237,7 @@
 	</div>
 	<Dock
 		on:click={onAppIconClick}
-		activeApplication={stateActiveApp.map(v=>v.context)}
+		activeApplication={stateActiveApp}
 	/>
 </div>
 

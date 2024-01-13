@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { interpolate } from 'popmotion';
 	import { spring } from 'svelte/motion';
-	import {tooltip} from '$lib/utils/tooltip';
+	import { tooltip } from '$lib/utils/tooltip';
 	import ButtonBase from './ButtonBase.svelte';
 	import { browser } from '$app/environment';
 	import { createEventDispatcher } from 'svelte';
@@ -10,9 +10,10 @@
 
 	export let appID: string;
 	export let mouseX: number | null;
+	export let active: boolean = true;
 
 	let el: HTMLImageElement;
-	const dispatcher = createEventDispatcher()
+	const dispatcher = createEventDispatcher();
 
 	/** Block 2 */
 
@@ -72,13 +73,13 @@
 		distance = beyondTheDistanceLimit;
 	}
 
-	function req(mouseX:number|null){
-		if(browser) {
+	function req(mouseX: number | null) {
+		if (browser) {
 			raf = requestAnimationFrame(() => animate(mouseX));
 		}
 	}
 
-	$: req(mouseX)
+	$: req(mouseX);
 </script>
 
 <section>
@@ -86,7 +87,7 @@
 		on:click={()=>{
 			dispatcher("click")
 		}}
-		class="dock-button">
+		class="dock-button flex flex-col place-self-center">
 		<img
 			use:tooltip={appID}
 			bind:this={el}
@@ -95,6 +96,9 @@
 			alt=""
 			style="width: {width};"
 		/>
+		{#if active}
+			<span class="w-1 h-1 bg-gray-900 rounded-full" />
+		{/if}
 	</ButtonBase>
 </section>
 

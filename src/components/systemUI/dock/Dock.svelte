@@ -1,11 +1,11 @@
 <script lang="ts">
 	import DockItem from './DockItem.svelte';
 	import { createEventDispatcher } from 'svelte';
-	import type { Application } from '$lib/manifest/application.manifest';
+	import { type ApplicationState } from '$lib/manifest/application.manifest';
 
 	const dispatcher = createEventDispatcher();
 
-	export let activeApplication: Array<Application> = [];
+	export let activeApplication: Array<ApplicationState> = [];
 	let mouseX: number | null = null;
 
 	function onItemClick(appID: string) {
@@ -26,24 +26,29 @@
 			<DockItem
 				mouseX={mouseX}
 				appID="launchpad"
+				active={false}
 				on:click={()=>{onItemClick('launchpad')}}
 			/>
 			<DockItem
 				mouseX={mouseX}
 				appID="finder"
+				active={false}
 				on:click={()=>{onItemClick('finder')}}
 			/>
-			<div class="divider bg-gray-900" aria-hidden="true" />
+			{#if activeApplication.length > 0}
+				<div class="divider bg-gray-900" aria-hidden="true" />
+			{/if}
 			{#each activeApplication as app}
-				{#if app.appID === 'divider'}
+				{#if app.context.appID === 'divider'}
 					<div class="divider bg-gray-900" aria-hidden="true" />
-				{:else if app.appID === 'finder'}
-				<!--	do nothin-->
+				{:else if app.context.appID === 'finder'}
+					<!--	do nothin-->
 				{:else }
 					<DockItem
 						mouseX={mouseX}
-						appID={app.appID}
-						on:click={()=>{onItemClick(app.appID)}}
+						appID={app.context.appID}
+						active={app.context.state !== 'close'}
+						on:click={()=>{onItemClick(app.context.appID)}}
 					/>
 				{/if}
 			{/each}
