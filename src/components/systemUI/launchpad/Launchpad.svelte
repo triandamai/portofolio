@@ -2,15 +2,14 @@
 	import { fadeIn, fadeOut } from '$lib/utils/fade';
 	import { clickOnNoElementId } from '$lib/utils/clickOnNoElementId';
 	import { createEventDispatcher } from 'svelte';
-	import type { Application } from '$lib/manifest/application.manifest';
+	import type { OsKernel } from '$lib/manifest/application.manifest';
 
 	import ButtonBase from '../dock/ButtonBase.svelte';
 
 	const dispatcher = createEventDispatcher();
 	let isShow: boolean = false;
-	let screen: HTMLDivElement | undefined;
 
-	export let application:Array<Application> = []
+	export let kernel:OsKernel
 
 	export function show() {
 		if (!isShow) {
@@ -30,7 +29,6 @@
 
 {#if isShow}
 	<div
-		bind:this={screen}
 		use:clickOnNoElementId="{{callback:()=>{
 			dispatcher('clickOutside', () => {
 					hide();
@@ -58,7 +56,7 @@
 			</div>
 			<div class="w-screen max-h-min flex flex-row place-content-center">
 				<div class="flex flex-row flex-wrap place-content-start overflow-y-hidden" style="height: 80vh; width: 70%;">
-					{#each application as app}
+					{#each kernel.applications as app}
 						<ButtonBase
 							id={app.appID}
 							on:click={()=>{dispatcher("click",app)}}

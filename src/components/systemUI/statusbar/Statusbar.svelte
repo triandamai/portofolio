@@ -1,7 +1,7 @@
 <script lang="ts">
-	import type { Application, OptionsMenu, SystemToolbarMenu } from '$lib/manifest/application.manifest';
+	import type { Application, OptionsMenu, OsKernel } from '$lib/manifest/application.manifest';
 	import { createEventDispatcher } from 'svelte';
-	import {fadeOut,fadeIn} from '$lib/utils/fade';
+	import { fadeIn, fadeOut } from '$lib/utils/fade';
 
 	import StatusbarTime from './StatusbarTime.svelte';
 	import Siri from '../../SVG/system/siri/Siri.svelte';
@@ -13,9 +13,9 @@
 	const dispatcher = createEventDispatcher();
 	let statusbar: HTMLDivElement;
 	let isShow: boolean = true;
+
+	export let kernel: OsKernel;
 	export let applicationContext: Application | null;
-	export let systemContextMenu: Array<OptionsMenu> = [];
-	export let systemToolbarMenu: Array<SystemToolbarMenu> = [];
 
 	export function show() {
 		if (!isShow) {
@@ -54,32 +54,21 @@
 		in:fadeIn
 		out:fadeOut
 		bind:this={statusbar} class="fixed z-10 h-7 w-screen top-0 left-0 shadow-2xl blur-0">
-		<div class="backdrop-blur-md bg-white/10 opacity-90 w-screen h-full flex flex-row place-content-between select-none">
+		<div
+			class="backdrop-blur-md bg-white/10 opacity-90 w-screen h-full flex flex-row place-content-between select-none">
 			<div class="place-self-center h-full flex flex-row">
-				<AppleLogo
-					on:down={()=>{
-				showContextMenu(systemContextMenu,5)
-			}}
+				<AppleLogo on:down={()=>{showContextMenu(kernel.menuToolbarSystem,5)}}
 				/>
 				{#if applicationContext}
-					<button
-						on:click={(e)=>{
-					showContextMenu(
-						applicationContext?.options ?? [],
-						e.target.offsetLeft
-					)
-				}}
-						class="text-white font-bold text-xs px-2 rounded-sm focus:bg-gray-300 focus:bg-opacity-60">{applicationContext?.name ?? ''}</button>
+					<button on:click={(e)=>{showContextMenu(applicationContext?.options ?? [],	e.target.offsetLeft)}}
+									class="text-white font-bold text-xs px-2 rounded-sm focus:bg-gray-300 focus:bg-opacity-60"
+					>
+						{applicationContext?.name ?? ''}
+					</button>
 				{/if}
-				{#each systemToolbarMenu as tool}
-					<button
-						on:click={(e)=>{
-					showContextMenu(
-						tool.contextMenu,
-						e.target.offsetLeft
-					)
-				}}
-						class="mx-0.5 min-w-max h-full text-white text-center text-xs cursor-default focus:bg-gray-300 focus:bg-opacity-60 rounded-sm px-3">
+				{#each kernel.toolbarSystem as tool}
+					<button on:click={(e)=>{showContextMenu(tool.contextMenu,e.target.offsetLeft)}}
+									class="mx-0.5 min-w-max h-full text-white text-center text-xs cursor-default focus:bg-gray-300 focus:bg-opacity-60 rounded-sm px-3">
 						{tool.name}
 					</button>
 				{/each}

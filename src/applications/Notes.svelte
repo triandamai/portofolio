@@ -1,9 +1,24 @@
 <script lang="ts">
 	import Cupertino from '../components/framework/Cupertino.svelte';
 	import TrafficLight from '../components/systemUI/TrafficLight.svelte';
-	import { createEventDispatcher } from 'svelte';
+	import { createEventDispatcher, onMount } from 'svelte';
+	import { Os } from '$lib/manifest/application.manifest';
 	const dispatcher = createEventDispatcher();
 
+	const { subscribe, unsubscribe, getOs } = Os();
+
+	onMount(() => {
+		subscribe('notes', 'notes', (data) => {
+			console.log('geheh', {
+				data,
+				os:getOs()
+			});
+		});
+
+		return () => {
+			unsubscribe('finder', 'finder');
+		};
+	});
 </script>
 
 <Cupertino

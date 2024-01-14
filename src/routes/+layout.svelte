@@ -1,8 +1,5 @@
 <script lang="ts">
 	import '../app.css';
-	import { run, loadSystemConfig } from './boot';
-	loadSystemConfig();
-	run();
-
+	import './boot';
 </script>
 <slot />

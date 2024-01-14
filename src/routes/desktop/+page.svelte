@@ -4,23 +4,27 @@
 	import { fly } from 'svelte/transition';
 	import {
 		type Application,
-		applications, type ApplicationState,
-		menu_toolbar_system, type OptionsMenu,
-		systemContext
+		type ApplicationState,
+		type OptionsMenu,
+		kernel,
+		Os,
 	} from '$lib/manifest/application.manifest';
 	import Dock from '../../components/systemUI/dock/Dock.svelte';
 	import MenuContext from '../../components/framework/MenuContext.svelte';
 	import MenuContextItem from '../../components/framework/MenuContextItem.svelte';
-	import DesktopContext from '../../components/systemUI/context/DesktopContext.svelte';
+	import DesktopMenuContext from '../../components/systemUI/context/DesktopContext.svelte';
 	import Statusbar from '../../components/systemUI/statusbar/Statusbar.svelte';
 	import DesktopContainer from '../../components/systemUI/window/DesktopContainer.svelte';
 	import Launchpad from '../../components/systemUI/launchpad/Launchpad.svelte';
 	import { updateElementZ } from '../../components/systemUI/window/window';
+	import { goto } from '$app/navigation';
 
+
+	const {broadcastEvent} = Os()
 
 	let statusBar: Statusbar;
 	let statusBarMenuContext: MenuContext;
-	let currentStatusbarMenuContext: Array<OptionsMenu> = systemContext;
+	let currentStatusbarMenuContext: Array<OptionsMenu> = kernel.menuToolbarSystem;
 
 	let launchpad: Launchpad;
 
@@ -44,8 +48,8 @@
 		stateActiveApp = stateActiveApp;
 	}
 
-	function onMaximizeApp(idx: number, detail: Application) {
-
+	function onMaximizeApp(_: number, app: Application) {
+		app;
 	}
 
 	function onCloseApp(idx: number, detail: Application) {
@@ -54,7 +58,8 @@
 		stateActiveApp = stateActiveApp;
 	}
 
-	function onAppIconClick({ detail }) {
+	function onAppIconClick(data: { detail: { appID: string } }) {
+		const detail = data.detail
 		if (detail.appID === 'launchpad') {
 			if (launchpad.displayed()) {
 				statusBar.show();
@@ -81,23 +86,25 @@
 				stateActiveApp = stateActiveApp;
 			} else {
 				//insert from applications to active
-				let findAppFromList = applications.find((v) => v.appID === detail.appID);
-				let prevData = stateActiveApp;
-				const index = () => {
-					if (stateActiveApp.length < 0) return 1;
-					else return stateActiveApp.length;
-				};
-				prevData.push({
-					state: 'open',
-					context: findAppFromList,
-					z: index()
-				});
-				stateActiveApp.forEach((v, index) => {
-					if (stateActiveApp[index].context.appID !== detail.appID) {
-						stateActiveApp[index].z = (stateActiveApp[index].z - 1);
-					}
-				});
-				stateActiveApp = stateActiveApp;
+				let findAppFromList = kernel.applications.find((v) => v.appID === detail.appID);
+				if (findAppFromList) {
+					let prevData = stateActiveApp;
+					const index = () => {
+						if (stateActiveApp.length < 0) return 1;
+						else return stateActiveApp.length;
+					};
+					prevData.push({
+						state: 'open',
+						context: findAppFromList,
+						z: index()
+					});
+					stateActiveApp.forEach((v, index) => {
+						if (stateActiveApp[index].context.appID !== detail.appID) {
+							stateActiveApp[index].z = (stateActiveApp[index].z - 1);
+						}
+					});
+					stateActiveApp = stateActiveApp;
+				}
 			}
 		}
 		updateElementZ(stateActiveApp);
@@ -119,6 +126,7 @@
 		onAppIconClick({ detail: { appID: appID } });
 	}
 
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	function moveApp(_: HTMLElement) {
 		window.addEventListener('mousemove', (e) => {
 			if (moving && e.offsetX > 1) {
@@ -151,12 +159,10 @@
 		}
 	});
 </script>
-<DesktopContext />
+<DesktopMenuContext />
 <MenuContext
 	bind:this={statusBarMenuContext}
-	on:clickOutside={({detail})=>{
-			detail()
-		}}
+	on:clickOutside={({detail})=>{detail()}}
 >
 	{#each currentStatusbarMenuContext as context }
 		<MenuContextItem
@@ -164,7 +170,12 @@
 			name={context.name}
 			on:itemClick={()=>{
 					statusBarMenuContext.hide()
-				}}
+					if(context.name === 'LockScreen' || context.name === 'Log Out'){
+						goto("/lock")
+					}else {
+						broadcastEvent("finder","ini data")
+					}
+			}}
 		/>
 	{/each}
 </MenuContext>
@@ -174,7 +185,7 @@
 	class="main-layout w-screen h-screen relative">
 	<Launchpad
 		bind:this={launchpad}
-		application={applications}
+		kernel={kernel}
 		on:clickOutside={({detail})=>{
 			hideLaunchpad()
 			detail()
@@ -186,8 +197,7 @@
 	<Statusbar
 		bind:this={statusBar}
 		applicationContext={current_active_app}
-		systemContextMenu={systemContext}
-		systemToolbarMenu={menu_toolbar_system}
+		kernel={kernel}
 		on:showMenuContext={({detail})=>{
 			currentStatusbarMenuContext = detail.contextMenu
 			statusBarMenuContext.show(detail.x,detail.y)
@@ -197,7 +207,7 @@
 	<div
 		use:moveApp
 		class="z-0 flex flex-col justify-between h-screen">
-		{#each applications as manifest,index}
+		{#each kernel.applications as manifest,index}
 			{#await loadComponent(manifest.component.componentName) then app}
 				<DesktopContainer
 					y={y}
