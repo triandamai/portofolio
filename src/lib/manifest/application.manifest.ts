@@ -1,3 +1,4 @@
+export type osEvent = 'selected-menu' | 'os-state-changed'
 export type ApplicationState = {
 	z: number,
 	context: Application,
@@ -37,7 +38,7 @@ export type OsKernel = {
 	showLaunchpad: boolean,
 	showStatusBar: boolean,
 	lock: boolean,
-	observer: Map<string, Map<string, (data: never) => void>>,
+	observer: Map<osEvent, Map<string, (data: any) => void>>,
 	applications: Array<Application>,
 	docked_app: Array<string>,
 	toolbar: Array<OptionsMenu>,
@@ -160,9 +161,9 @@ export function Os() {
 		return kernel;
 	}
 
-	function subscribe(target: string, key: string, event: (data: never) => void) {
+	function subscribe(target: osEvent, key: string, event: (data: any) => void) {
 		if (!kernel.observer.has(target)) {
-			const map = new Map<string, (data: never) => void>();
+			const map = new Map<string, (data: any) => void>();
 			map.set(key, event);
 			kernel.observer.set(target, map);
 		} else {
@@ -170,21 +171,22 @@ export function Os() {
 		}
 	}
 
-	function unsubscribe(target: string, key: string) {
+	function unsubscribe(target: osEvent, key: string) {
 		if (kernel.observer.has(target)) {
 			kernel.observer.get(target)?.delete(key);
 		}
 	}
 
-	function broadcastEvent(data: never) {
+	function broadcastEvent(data: any) {
 		kernel.observer.forEach((observer) => {
 			observer.forEach((subs) => {
+
 				subs(data);
 			});
 		});
 	}
 
-	function publishEvent(target: string, data: never) {
+	function publishEvent(target: osEvent, data: never) {
 		kernel.observer.get(target)?.forEach((subs) => {
 			subs(data);
 		});

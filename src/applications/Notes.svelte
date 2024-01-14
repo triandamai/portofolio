@@ -3,15 +3,16 @@
 	import TrafficLight from '../components/systemUI/TrafficLight.svelte';
 	import { createEventDispatcher, onMount } from 'svelte';
 	import { Os } from '$lib/manifest/application.manifest';
+
 	const dispatcher = createEventDispatcher();
 
 	const { subscribe, unsubscribe, getOs } = Os();
 
 	onMount(() => {
-		subscribe('notes', 'notes', (data) => {
-			console.log('geheh', {
+		subscribe('selected-menu', 'notes', (data) => {
+			console.log('on toolbar menu selected', {
 				data,
-				os:getOs()
+				os: getOs()
 			});
 		});
 

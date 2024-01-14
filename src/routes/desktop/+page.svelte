@@ -173,7 +173,7 @@
 					if(context.name === 'LockScreen' || context.name === 'Log Out'){
 						goto("/lock")
 					}else {
-						broadcastEvent("finder","ini data")
+						broadcastEvent("ini data")
 					}
 			}}
 		/>

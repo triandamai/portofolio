@@ -9,10 +9,10 @@
 	const { subscribe, unsubscribe, getOs } = Os();
 
 	onMount(() => {
-		subscribe('finder', 'finder', (data) => {
+		subscribe('selected-menu', 'finder', (data) => {
 			console.log('geheh', {
 				data,
-				os:getOs()
+				os: getOs()
 			});
 		});
 
