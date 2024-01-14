@@ -59,18 +59,20 @@
 			<div class="place-self-center h-full flex flex-row">
 				<AppleLogo on:down={()=>{showContextMenu(kernel.menuToolbarSystem,5)}}
 				/>
-				{#if applicationContext}
-					<button on:click={(e)=>{showContextMenu(applicationContext?.options ?? [],	e.target.offsetLeft)}}
-									class="text-white font-bold text-xs px-2 rounded-sm focus:bg-gray-300 focus:bg-opacity-60"
-					>
-						{applicationContext?.name ?? ''}
-					</button>
-				{/if}
-				{#each kernel.toolbarSystem as tool}
-					<button on:click={(e)=>{showContextMenu(tool.contextMenu,e.target.offsetLeft)}}
-									class="mx-0.5 min-w-max h-full text-white text-center text-xs cursor-default focus:bg-gray-300 focus:bg-opacity-60 rounded-sm px-3">
-						{tool.name}
-					</button>
+				{#each applicationContext?.tools ?? kernel.toolbarSystem as tool}
+					{#if tool.name === applicationContext?.name}
+						<button on:click={(e)=>{showContextMenu(tool?.contextMenu ?? [],	e.target.offsetLeft)}}
+										class="text-white font-bold text-xs px-2 rounded-sm focus:bg-gray-300 focus:bg-opacity-60"
+						>
+							{applicationContext?.name ?? ''}
+						</button>
+					{:else}
+						<button on:click={(e)=>{showContextMenu(tool.contextMenu,e.target.offsetLeft)}}
+										class="mx-0.5 min-w-max h-full text-white text-center text-xs cursor-default focus:bg-gray-300 focus:bg-opacity-60 rounded-sm px-3">
+							{tool.name}
+						</button>
+					{/if}
+
 				{/each}
 			</div>
 			<div class="place-self-center flex flex-row">

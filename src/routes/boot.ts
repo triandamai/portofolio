@@ -4,34 +4,34 @@ import {
 
 const kernel = Os();
 
-kernel.createSystemToolbar({
-	name: 'File',
-	contextMenu: kernel.createOptionsMenu(
-		['New', 'Open...', 'Save as', 'Recent'],
-		['Remote Developments']
-	)
-});
-kernel.createSystemToolbar({
-	name: 'Edit',
-	contextMenu: kernel.createOptionsMenu(
-		['Undo', 'Redo'],
-		['Cut', 'Copy', 'Paste', 'Copy Path/Reference', 'Delete'],
-		['Find', 'Find Usages']
-	)
-});
-kernel.createSystemToolbar({
-	name: 'Selection',
-	contextMenu: kernel.createOptionsMenu(
-		['Always Show Bookmar Bar', 'Always Hide Toolbar']
-	)
-});
-kernel.createSystemToolbar({
-	name: 'View',
-	contextMenu: kernel.createOptionsMenu(
-		['Always Show Bookmar Bar', 'Always Hide Toolbar']
-	)
-});
 kernel.createSystemToolbar(
+	{
+		name: 'File',
+		contextMenu: kernel.createOptionsMenu(
+			['New', 'Open...', 'Save as', 'Recent'],
+			['Remote Developments']
+		)
+	},
+	{
+		name: 'Edit',
+		contextMenu: kernel.createOptionsMenu(
+			['Undo', 'Redo'],
+			['Cut', 'Copy', 'Paste', 'Copy Path/Reference', 'Delete'],
+			['Find', 'Find Usages']
+		)
+	},
+	{
+		name: 'Selection',
+		contextMenu: kernel.createOptionsMenu(
+			['Always Show Bookmar Bar', 'Always Hide Toolbar']
+		)
+	},
+	{
+		name: 'View',
+		contextMenu: kernel.createOptionsMenu(
+			['Always Show Bookmar Bar', 'Always Hide Toolbar']
+		)
+	},
 	{
 		name: 'Terminal',
 		contextMenu: kernel.createOptionsMenu(
@@ -54,9 +54,18 @@ kernel.createAppConfig(
 			useDefaultPlatform: true
 		}),
 		openWhenStarting: false,
-		options: kernel.createOptionsMenu(
-			['About Finder'], ['Settings...'], ['Hide Finder', 'Close Finder']
-		)
+		toolbar: kernel.createToolbar({
+				name: 'Finder',
+				contextMenu: kernel.createOptionsMenu(
+					['About Finder'], ['Settings...'], ['Hide Finder', 'Close Finder']
+				)
+			},
+			{
+				name: 'Edit',
+				contextMenu: kernel.createOptionsMenu(
+					['New Folder'], ['Trash'], ['Hide File']
+				)
+			})
 	}
 );
 
@@ -74,8 +83,12 @@ kernel.createAppConfig(
 			useDefaultPlatform: true
 		}),
 		openWhenStarting: false,
-		options: kernel.createOptionsMenu(
-			['About Notes'], ['Settings...'], ['Hide Note', 'Close Note']
+		toolbar: kernel.createToolbar({
+				name: 'Notes',
+				contextMenu: kernel.createOptionsMenu(
+					['About Notes'], ['Settings...'], ['Hide Note', 'Close Note']
+				)
+			}
 		)
 	}
 );

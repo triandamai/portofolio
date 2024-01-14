@@ -6,7 +6,7 @@ export type ApplicationState = {
 	x: number,
 	y: number
 }
-export type SystemToolbarMenu = {
+export type Toolbar = {
 	name: string;
 	contextMenu: Array<OptionsMenu>
 }
@@ -29,7 +29,7 @@ export type Application = {
 	appID: string,
 	component: Window,
 	state: 'open' | 'quit',
-	options: Array<OptionsMenu>,
+	tools: Array<Toolbar>,
 	isDocked: boolean
 }
 export type OsKernel = {
@@ -41,8 +41,8 @@ export type OsKernel = {
 	observer: Map<osEvent, Map<string, (data: any) => void>>,
 	applications: Array<Application>,
 	docked_app: Array<string>,
-	toolbar: Array<OptionsMenu>,
-	toolbarSystem: Array<SystemToolbarMenu>,
+	toolbar: Array<Toolbar>,
+	toolbarSystem: Array<Toolbar>,
 	menuToolbarSystem: Array<OptionsMenu>,
 	wallpaper: string
 }
@@ -127,6 +127,10 @@ export function Os() {
 		return config;
 	}
 
+	function createToolbar(...tools:Array<Toolbar>){
+		return tools
+	}
+
 	function createAppConfig(
 		config: {
 			appID: string,
@@ -134,7 +138,7 @@ export function Os() {
 			author: string,
 			component: Window,
 			openWhenStarting: boolean,
-			options: Array<OptionsMenu>
+			toolbar: Array<Toolbar>
 		}
 	) {
 
@@ -144,17 +148,17 @@ export function Os() {
 			author: config.author,
 			component: config.component,
 			state: config.openWhenStarting ? 'open' : 'quit',
-			options: [...config.options],
-			isDocked: kernel.docked_app.includes(config.appID)
+			isDocked: kernel.docked_app.includes(config.appID),
+			tools:config.toolbar
 		};
 		kernel.applications.push(app);
 	}
 
 
 	function createSystemToolbar(
-		config: SystemToolbarMenu
+		...config: Array<Toolbar>
 	) {
-		kernel.toolbarSystem.push(config);
+		kernel.toolbarSystem = config
 	}
 
 	function getOs(): OsKernel {
@@ -193,6 +197,7 @@ export function Os() {
 	}
 
 	return {
+		createToolbar,
 		createOptionsMenu,
 		createAppConfig,
 		createWindowConfig,

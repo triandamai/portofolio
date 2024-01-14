@@ -7,7 +7,7 @@
 		type ApplicationState,
 		type OptionsMenu,
 		kernel,
-		Os,
+		Os
 	} from '$lib/manifest/application.manifest';
 	import Dock from '../../components/systemUI/dock/Dock.svelte';
 	import MenuContext from '../../components/framework/MenuContext.svelte';
@@ -20,7 +20,7 @@
 	import { goto } from '$app/navigation';
 
 
-	const {broadcastEvent} = Os()
+	const { broadcastEvent } = Os();
 
 	let statusBar: Statusbar;
 	let statusBarMenuContext: MenuContext;
@@ -34,8 +34,8 @@
 	let y: number = 300;
 	let x: number = 100;
 
-	let current_active_app: Application | null = null;
-	let stateActiveApp: Array<ApplicationState> = [];
+	let activeApp: Application | null = null;
+	let listStateApp: Array<ApplicationState> = [];
 
 	async function loadComponent(componentName: string) {
 		return await import(`../../applications/${componentName}.svelte`);
@@ -43,9 +43,9 @@
 
 
 	function onMinimizeApp(idx: number, detail: Application) {
-		let findIndex = stateActiveApp.map(v => v.context.appID).indexOf(detail.appID);
-		stateActiveApp[findIndex].state = 'idle';
-		stateActiveApp = stateActiveApp;
+		let findIndex = listStateApp.map(v => v.context.appID).indexOf(detail.appID);
+		listStateApp[findIndex].state = 'idle';
+		listStateApp = listStateApp;
 	}
 
 	function onMaximizeApp(_: number, app: Application) {
@@ -53,13 +53,13 @@
 	}
 
 	function onCloseApp(idx: number, detail: Application) {
-		let findIndex = stateActiveApp.map(v => v.context.appID).indexOf(detail.appID);
-		stateActiveApp.splice(findIndex, 1);
-		stateActiveApp = stateActiveApp;
+		let findIndex = listStateApp.map(v => v.context.appID).indexOf(detail.appID);
+		listStateApp.splice(findIndex, 1);
+		listStateApp = listStateApp;
 	}
 
 	function onAppIconClick(data: { detail: { appID: string } }) {
-		const detail = data.detail
+		const detail = data.detail;
 		if (detail.appID === 'launchpad') {
 			if (launchpad.displayed()) {
 				statusBar.show();
@@ -72,42 +72,44 @@
 			statusBar.show();
 			launchpad.hide();
 
-			const findApp = stateActiveApp.find((v) => v.context.appID === detail.appID);
+			const findApp = listStateApp.find((v) => v.context.appID === detail.appID);
 			if (findApp) {
 				//open
-				stateActiveApp.forEach((v, index) => {
-					if (stateActiveApp[index].context.appID === findApp.context.appID) {
-						stateActiveApp[index].state = 'open';
-						stateActiveApp[index].z = stateActiveApp.length;
+				listStateApp.forEach((v, index) => {
+					if (listStateApp[index].context.appID === findApp.context.appID) {
+						listStateApp[index].state = 'open';
+						listStateApp[index].z = listStateApp.length;
 					} else {
-						stateActiveApp[index].z = (stateActiveApp.length - 1);
+						listStateApp[index].z = (listStateApp.length - 1);
 					}
 				});
-				stateActiveApp = stateActiveApp;
+				activeApp = findApp.context;
+				listStateApp = listStateApp;
 			} else {
 				//insert from applications to active
 				let findAppFromList = kernel.applications.find((v) => v.appID === detail.appID);
 				if (findAppFromList) {
-					let prevData = stateActiveApp;
+					let prevData = listStateApp;
 					const index = () => {
-						if (stateActiveApp.length < 0) return 1;
-						else return stateActiveApp.length;
+						if (listStateApp.length < 0) return 1;
+						else return listStateApp.length;
 					};
 					prevData.push({
 						state: 'open',
 						context: findAppFromList,
 						z: index()
 					});
-					stateActiveApp.forEach((v, index) => {
-						if (stateActiveApp[index].context.appID !== detail.appID) {
-							stateActiveApp[index].z = (stateActiveApp[index].z - 1);
+					activeApp = findAppFromList;
+					listStateApp.forEach((v, index) => {
+						if (listStateApp[index].context.appID !== detail.appID) {
+							listStateApp[index].z = (listStateApp[index].z - 1);
 						}
 					});
-					stateActiveApp = stateActiveApp;
+					listStateApp = listStateApp;
 				}
 			}
 		}
-		updateElementZ(stateActiveApp);
+		updateElementZ(listStateApp);
 	}
 
 	function hideLaunchpad() {
@@ -196,7 +198,7 @@
 	/>
 	<Statusbar
 		bind:this={statusBar}
-		applicationContext={current_active_app}
+		applicationContext={activeApp}
 		kernel={kernel}
 		on:showMenuContext={({detail})=>{
 			currentStatusbarMenuContext = detail.contextMenu
@@ -213,12 +215,12 @@
 					y={y}
 					x={x}
 					application_id={manifest.appID}
-					current_application_active={current_active_app?.appID}
-					applicationsState={stateActiveApp}
+					activeApplication={activeApp?.appID}
+					applicationsState={listStateApp}
 					width={manifest.component.width}
 					height={manifest.component.height}
 					on:down={()=>{
-							current_active_app = manifest
+							activeApp = manifest
 							onAppIconClick({detail:{
 								appID:manifest.appID
 							}})
@@ -226,10 +228,10 @@
 				>
 					<svelte:component
 						this={app.default}
-						on:headerDown={()=>{
+						on:move={()=>{
 								moving = true
-								current_active_app = manifest
-								getCurrentPosition(current_active_app?.appID)
+								activeApp = manifest
+								getCurrentPosition(activeApp?.appID)
 							}}
 						on:close={()=>{
 								onCloseApp(index,manifest)
@@ -247,7 +249,7 @@
 	</div>
 	<Dock
 		on:click={onAppIconClick}
-		activeApplication={stateActiveApp}
+		activeApplication={listStateApp}
 	/>
 </div>
 

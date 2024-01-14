@@ -4,7 +4,7 @@
 
 	export let y: number;
 	export let x: number;
-	export let current_application_active = '';
+	export let activeApplication:string='';
 	export let application_id = '';
 	export let width: number;
 	export let height: number;
@@ -17,7 +17,7 @@
 	let dispatcher = createEventDispatcher();
 
 	export function move(top: number, left: number) {
-		if (current_application_active === application_id) {
+		if (activeApplication === application_id) {
 			if (app) {
 				app.style.left = `${left}px`;
 				app.style.top = `${top}px`;

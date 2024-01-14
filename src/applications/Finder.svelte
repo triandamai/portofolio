@@ -17,7 +17,7 @@
 		});
 
 		return () => {
-			unsubscribe('finder', 'finder');
+			unsubscribe('selected-menu', 'finder');
 		};
 	});
 
@@ -25,7 +25,7 @@
 
 <Cupertino
 	on:down={()=>{
-	dispatcher("headerDown",{})
+	dispatcher("move",{})
 }}>
 	<TrafficLight
 		slot="appbar"
