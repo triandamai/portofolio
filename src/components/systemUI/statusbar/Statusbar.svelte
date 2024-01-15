@@ -55,20 +55,20 @@
 		out:fadeOut
 		bind:this={statusbar} class="fixed z-10 h-7 w-screen top-0 left-0 shadow-2xl blur-0">
 		<div
-			class="backdrop-blur-md bg-white/10 opacity-90 w-screen h-full flex flex-row place-content-between select-none">
+			class="backdrop-blur-md bg-white/30 w-screen h-full flex flex-row place-content-between select-none">
 			<div class="place-self-center h-full flex flex-row">
 				<AppleLogo on:down={()=>{showContextMenu(kernel.menuToolbarSystem,5)}}
 				/>
 				{#each applicationContext?.tools ?? kernel.toolbarSystem as tool}
 					{#if tool.name === applicationContext?.name}
 						<button on:click={(e)=>{showContextMenu(tool?.contextMenu ?? [],	e.target.offsetLeft)}}
-										class="text-white font-bold text-xs px-2 rounded-sm focus:bg-gray-300 focus:bg-opacity-60"
+										class=" font-bold text-xs px-2 rounded-sm focus:bg-gray-300 focus:bg-opacity-60 text-gray-900 dark:text-white"
 						>
 							{applicationContext?.name ?? ''}
 						</button>
 					{:else}
 						<button on:click={(e)=>{showContextMenu(tool.contextMenu,e.target.offsetLeft)}}
-										class="mx-0.5 min-w-max h-full text-white text-center text-xs cursor-default focus:bg-gray-300 focus:bg-opacity-60 rounded-sm px-3">
+										class="mx-0.5 min-w-max h-full text-center text-xs cursor-default focus:bg-gray-300 focus:bg-opacity-60 rounded-sm px-3 text-gray-900 dark:text-white">
 							{tool.name}
 						</button>
 					{/if}

@@ -5,8 +5,9 @@
 
 	const dispatcher = createEventDispatcher();
 
-	export let activeApplication: Array<ApplicationState> = [];
+	export let activeApplication: Map<string, ApplicationState> = [];
 	let mouseX: number | null = null;
+	let isDividerShow: boolean = false;
 
 	function onItemClick(appID: string) {
 		dispatcher('click', {
@@ -14,12 +15,25 @@
 		});
 	}
 
+	function showDivider(app: Map<string, ApplicationState>) {
+		if (app.size <= 0) {
+			isDividerShow = false;
+			return;
+		}
+		if (app.size == 1 && app.has('finder')) {
+			isDividerShow = false;
+			return;
+		}
+		isDividerShow = true;
+	}
+
+	$: showDivider(activeApplication);
 </script>
 <div
 	class="fixed bottom-0 z-10 h-10 w-screen flex flex-row">
 	<div class="dock-container">
 		<div
-			class="dock-el rounded-lg backdrop-blur-md bg-white/30"
+			class="dock-el rounded-2xl backdrop-blur-md bg-white/30"
 			on:mousemove={(event)=>(mouseX = event.x)}
 			on:mouseleave={()=>(mouseX = null)}
 		>
@@ -32,23 +46,19 @@
 			<DockItem
 				mouseX={mouseX}
 				appID="finder"
-				active={false}
+				active={activeApplication.get('finder')?.state !== 'close'}
 				on:click={()=>{onItemClick('finder')}}
 			/>
-			{#if activeApplication.length > 0}
+			{#if isDividerShow}
 				<div class="divider bg-gray-900" aria-hidden="true" />
 			{/if}
-			{#each activeApplication as app}
-				{#if app.context.appID === 'divider'}
-					<div class="divider bg-gray-900" aria-hidden="true" />
-				{:else if app.context.appID === 'finder'}
-					<!--	do nothin-->
-				{:else }
+			{#each [...activeApplication] as [key, app]}
+				{#if key !== 'finder'}
 					<DockItem
 						mouseX={mouseX}
 						appID={app.context.appID}
-						active={app.context.state !== 'close'}
-						on:click={()=>{onItemClick(app.context.appID)}}
+						active={activeApplication.get(key)?.state !== 'close'}
+						on:click={()=>{onItemClick(key)}}
 					/>
 				{/if}
 			{/each}
@@ -64,7 +74,7 @@
     position: fixed;
 
     width: 100%;
-    height: 4.4rem;
+    height: 4.8rem;
 
     padding: 0.4rem;
 

@@ -1,31 +1,21 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { browser } from '$app/environment';
-	import { fly } from 'svelte/transition';
-	import {
-		type Application,
-		type ApplicationState,
-		type OptionsMenu,
-		kernel,
-		Os
-	} from '$lib/manifest/application.manifest';
+	import { fadeOut, fadeIn } from '$lib/utils/fade';
+	import { type Application, type ApplicationState, kernel, Os } from '$lib/manifest/application.manifest';
 	import Dock from '../../components/systemUI/dock/Dock.svelte';
-	import MenuContext from '../../components/framework/MenuContext.svelte';
-	import MenuContextItem from '../../components/framework/MenuContextItem.svelte';
 	import DesktopMenuContext from '../../components/systemUI/context/DesktopContext.svelte';
 	import Statusbar from '../../components/systemUI/statusbar/Statusbar.svelte';
 	import DesktopContainer from '../../components/systemUI/window/DesktopContainer.svelte';
 	import Launchpad from '../../components/systemUI/launchpad/Launchpad.svelte';
-	import { updateElementZ } from '../../components/systemUI/window/window';
-	import { goto } from '$app/navigation';
+	import { normalizePosition, updateElementZ } from '../../components/systemUI/window/window';
+	import StatusbarContext from '../../components/systemUI/context/StatusbarContext.svelte';
 
 
-	const { broadcastEvent } = Os();
+	const { createWindowConfig } = Os();
 
 	let statusBar: Statusbar;
-	let statusBarMenuContext: MenuContext;
-	let currentStatusbarMenuContext: Array<OptionsMenu> = kernel.menuToolbarSystem;
-
+	let statusBarMenuContext: StatusbarContext;
 	let launchpad: Launchpad;
 
 	let maxYOffset: number = 0;
@@ -34,87 +24,105 @@
 	let y: number = 300;
 	let x: number = 100;
 
-	let activeApp: Application | null = null;
-	let listStateApp: Array<ApplicationState> = [];
+	let activeApp: ApplicationState | null = null;
+	let listStateApp: Map<string, ApplicationState> = new Map<string, ApplicationState>();
 
 	async function loadComponent(componentName: string) {
 		return await import(`../../applications/${componentName}.svelte`);
 	}
 
 
-	function onMinimizeApp(idx: number, detail: Application) {
-		let findIndex = listStateApp.map(v => v.context.appID).indexOf(detail.appID);
-		listStateApp[findIndex].state = 'idle';
+	function onMinimizeApp(detail: Application) {
+		if (!activeApp) return;
+		let data = activeApp;
+		data.state = 'idle';
+		listStateApp.set(detail.appID, data);
 		listStateApp = listStateApp;
 	}
 
-	function onMaximizeApp(_: number, app: Application) {
-		app;
+	function onMaximizeApp(app: Application) {
+		if (activeApp == null) return;
+		let oldActive = activeApp;
+		if (activeApp.size === 'min') {
+			oldActive.size = 'max';
+			oldActive.width = screen.width;
+			oldActive.height = screen.height;
+		} else {
+			oldActive.size = 'min';
+			oldActive.x = activeApp.x
+			oldActive.y = activeApp.y
+			oldActive.width = app.component.width;
+			oldActive.height = app.component.height;
+		}
+		activeApp = oldActive;
 	}
 
-	function onCloseApp(idx: number, detail: Application) {
-		let findIndex = listStateApp.map(v => v.context.appID).indexOf(detail.appID);
-		listStateApp.splice(findIndex, 1);
-		listStateApp = listStateApp;
+	function onCloseApp(detail: Application) {
+		if (activeApp) {
+			activeApp.state = 'close';
+			listStateApp.set(detail.appID, activeApp);
+			listStateApp = listStateApp;
+			activeApp = null;
+		}
 	}
+
+	function showLaunchpad() {
+		if (launchpad.displayed()) {
+			hideLaunchpad();
+		} else {
+			statusBar.hide();
+			launchpad.show();
+		}
+	}
+
+	function hideLaunchpad() {
+		statusBar.show();
+		launchpad.hide();
+	}
+
 
 	function onAppIconClick(data: { detail: { appID: string } }) {
 		const detail = data.detail;
 		if (detail.appID === 'launchpad') {
-			if (launchpad.displayed()) {
-				statusBar.show();
-				launchpad.hide();
-			} else {
-				statusBar.hide();
-				launchpad.show();
-			}
+			showLaunchpad();
 		} else {
-			statusBar.show();
-			launchpad.hide();
-
-			const findApp = listStateApp.find((v) => v.context.appID === detail.appID);
-			if (findApp) {
+			hideLaunchpad();
+			//update or insert to list active app
+			if (listStateApp.has(detail.appID)) {
 				//open
-				listStateApp.forEach((v, index) => {
-					if (listStateApp[index].context.appID === findApp.context.appID) {
-						listStateApp[index].state = 'open';
-						listStateApp[index].z = listStateApp.length;
-					} else {
-						listStateApp[index].z = (listStateApp.length - 1);
-					}
-				});
-				activeApp = findApp.context;
-				listStateApp = listStateApp;
+				let findApp = listStateApp.get(detail.appID);
+				if (findApp) {
+					findApp.state = 'open';
+					findApp.z = listStateApp.size + 1;
+
+					activeApp = findApp;
+					listStateApp = normalizePosition(listStateApp, findApp);
+					updateElementZ(listStateApp, detail.appID);
+				}
 			} else {
 				//insert from applications to active
 				let findAppFromList = kernel.applications.find((v) => v.appID === detail.appID);
 				if (findAppFromList) {
 					let prevData = listStateApp;
 					const index = () => {
-						if (listStateApp.length < 0) return 1;
-						else return listStateApp.length;
+						if (listStateApp.size < 0) return 1;
+						else return listStateApp.size;
 					};
-					prevData.push({
+					let newData: ApplicationState = {
 						state: 'open',
 						context: findAppFromList,
-						z: index()
-					});
-					activeApp = findAppFromList;
-					listStateApp.forEach((v, index) => {
-						if (listStateApp[index].context.appID !== detail.appID) {
-							listStateApp[index].z = (listStateApp[index].z - 1);
-						}
-					});
-					listStateApp = listStateApp;
+						z: index(),
+						size: 'min',
+						width: findAppFromList.component.width,
+						height: findAppFromList.component.height
+					};
+					prevData.set(findAppFromList.appID, newData);
+					activeApp = newData;
+					listStateApp = normalizePosition(prevData, newData);
+					updateElementZ(listStateApp, detail.appID);
 				}
 			}
 		}
-		updateElementZ(listStateApp);
-	}
-
-	function hideLaunchpad() {
-		launchpad.hide();
-		statusBar.show();
 	}
 
 	function getCurrentPosition(appID: string) {
@@ -144,6 +152,12 @@
 					y += e.movementY;
 				}
 				oldY = e.pageY;
+				if (activeApp) {
+					let old = activeApp;
+					old.x = x;
+					old.y = y;
+					activeApp = old;
+				}
 			}
 		});
 
@@ -159,31 +173,19 @@
 			maxYOffset = (statusbarInfo.height + statusbarInfo.x);
 			y = maxYOffset;
 		}
+		let w = screen.width;
+		let h = screen.height;
+		createWindowConfig(w, h, maxYOffset);
 	});
 </script>
 <DesktopMenuContext />
-<MenuContext
+<StatusbarContext
 	bind:this={statusBarMenuContext}
 	on:clickOutside={({detail})=>{detail()}}
->
-	{#each currentStatusbarMenuContext as context }
-		<MenuContextItem
-			type={context.type}
-			name={context.name}
-			on:itemClick={()=>{
-					statusBarMenuContext.hide()
-					if(context.name === 'LockScreen' || context.name === 'Log Out'){
-						goto("/lock")
-					}else {
-						broadcastEvent("ini data")
-					}
-			}}
-		/>
-	{/each}
-</MenuContext>
+/>
 <div
-	in:fly={{ x: -200, duration: 300, delay: 1000 }}
-	out:fly={{ x: 200, duration: 300 }}
+	in:fadeIn
+	out:fadeOut
 	class="main-layout w-screen h-screen relative">
 	<Launchpad
 		bind:this={launchpad}
@@ -201,8 +203,7 @@
 		applicationContext={activeApp}
 		kernel={kernel}
 		on:showMenuContext={({detail})=>{
-			currentStatusbarMenuContext = detail.contextMenu
-			statusBarMenuContext.show(detail.x,detail.y)
+			statusBarMenuContext.show(detail.x,detail.y,detail.contextMenu)
 		}}
 	/>
 
@@ -212,35 +213,30 @@
 		{#each kernel.applications as manifest,index}
 			{#await loadComponent(manifest.component.componentName) then app}
 				<DesktopContainer
-					y={y}
-					x={x}
-					application_id={manifest.appID}
-					activeApplication={activeApp?.appID}
+					applicationContext={manifest}
+					activeApplication={activeApp}
 					applicationsState={listStateApp}
-					width={manifest.component.width}
-					height={manifest.component.height}
-					on:down={()=>{
-							activeApp = manifest
-							onAppIconClick({detail:{
-								appID:manifest.appID
-							}})
-					}}
-				>
+					kernel={kernel}>
 					<svelte:component
 						this={app.default}
-						on:move={()=>{
+						on:enableMove={()=>{
 								moving = true
-								activeApp = manifest
-								getCurrentPosition(activeApp?.appID)
+								activeApp = null
+								getCurrentPosition(manifest.appID)
+							}}
+						on:windowActive={()=>{
+								moving = true
+								activeApp = null
+								getCurrentPosition(manifest.appID)
 							}}
 						on:close={()=>{
-								onCloseApp(index,manifest)
+								onCloseApp(manifest)
 							}}
 						on:minimize={()=>{
-								onMinimizeApp(index,manifest)
+								onMinimizeApp(manifest)
 							}}
 						on:maximize={()=>{
-								onMaximizeApp(index,manifest)
+								onMaximizeApp(manifest)
 							}}
 					/>
 				</DesktopContainer>

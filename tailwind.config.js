@@ -2,7 +2,7 @@
 export default {
   content: ['./src/**/*.{html,js,svelte,ts}'],
   presets: [],
-  darkMode: 'media', // or 'class'
+  darkMode: 'class', // or 'media'
   theme: {
     accentColor: ({ theme }) => ({
       ...theme('colors'),

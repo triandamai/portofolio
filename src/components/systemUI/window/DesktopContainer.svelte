@@ -1,62 +1,81 @@
 <script lang="ts">
-	import { createEventDispatcher, onMount } from 'svelte';
-	import type { ApplicationState } from '$lib/manifest/application.manifest';
+	import { createEventDispatcher } from 'svelte';
+	import type { Application, ApplicationState, OsKernel } from '$lib/manifest/application.manifest';
+	import { fadeIn, fadeOut } from '$lib/utils/fade';
+	import { tweened } from 'svelte/motion';
+	import { sineInOut } from 'svelte/easing';
 
-	export let y: number;
-	export let x: number;
-	export let activeApplication:string='';
-	export let application_id = '';
-	export let width: number;
-	export let height: number;
-
+	export let activeApplication: ApplicationState | null = null;
+	export let applicationContext: Application;
 	export let applicationsState: Array<ApplicationState> = [];
 
-	let show: boolean = false;
+	const width = tweened(0, {
+		duration: 200,
+		easing: sineInOut
+	});
+	const height = tweened(0, {
+		duration: 200,
+		easing: sineInOut
+	});
+	let maxYOffset: number = 100;
 
+	export let kernel: OsKernel;
+
+	let show: boolean = false;
 	let app: HTMLDivElement;
 	let dispatcher = createEventDispatcher();
 
-	export function move(top: number, left: number) {
-		if (activeApplication === application_id) {
-			if (app) {
-				app.style.left = `${left}px`;
-				app.style.top = `${top}px`;
-			}
+	export function move(state: ApplicationState | null) {
+		if (state === null) return;
+		if (state.context.appID !== applicationContext.appID) return;
+		if (!app) return;
+		width.set(state.width);
+		height.set(state.height);
+		if (state.size === 'min') {
+
+			app.style.left = `${state.x}px`;
+			app.style.top = `${state.y}px`;
+		} else {
+			app.style.left = `0px`;
+			app.style.top = `${maxYOffset}px`;
 		}
 	}
 
-	function detectWindow(data: Array<ApplicationState>) {
-		let findApp = data.find((v => v.context.appID === application_id));
+	function detectWindow(data: Map<string, ApplicationState>) {
+		let findApp = data.has(applicationContext.appID);
 		if (findApp) {
-			show = findApp.state === 'open';
-			addListener()
+			let findApp = data.get(applicationContext.appID);
+			if (findApp) {
+				show = findApp.state === 'open';
+			}
 		} else {
 			show = false;
 		}
-
 	}
 
-	function addListener(){
-		if(app) {
-			app.addEventListener('mousedown', () => {
-				dispatcher('down', {});
-			});
-		}
+	function initApp(app: Application) {
+		width.set(app.component.width);
+		height.set(app.component.height);
 	}
 
+	function initContext(kernel: OsKernel) {
+		maxYOffset = kernel.screen.maxYOffset;
+	}
+
+	$: move(activeApplication);
+	$: initApp(applicationContext);
+	$: initContext(kernel);
 	$: detectWindow(applicationsState);
-	$: move(y, x);
 
-	onMount(() => {
-		addListener()
-	});
 </script>
 {#if show}
 	<div
-		id={application_id}
+		id={applicationContext.appID}
 		bind:this={app}
+		in:fadeIn
+		out:fadeOut
 		class="backdrop-blur-[500px] bg-white/40 absolute shadow-2xl rounded-md"
-		style="width: {width}px; height: {height}px; left:30%; top:30%; z-index:1;"
+		style="width: {$width}px;height:{$height}px; left:10px; top:28px; z-index:1;"
 	>
 		<slot />
 	</div>

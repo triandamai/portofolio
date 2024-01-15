@@ -3,8 +3,11 @@ export type ApplicationState = {
 	z: number,
 	context: Application,
 	state: 'open' | 'close' | 'idle',
-	x: number,
-	y: number
+	size: 'max' | 'min'
+	width: number,
+	height: number,
+	x:number,
+	y:number
 }
 export type Toolbar = {
 	name: string;
@@ -16,18 +19,21 @@ export type OptionsMenu = {
 	type: 'divider' | 'button',
 }
 export type Window = {
+	maxYOffset:number,
+	width: number,
+	height: number
+}
+export type Frame = {
 	componentName: string,
 	width: number,
 	height: number,
-	x: number,
-	y: number,
 	useDefaultPlatform: boolean
 }
 export type Application = {
 	name: string,
 	author: string,
 	appID: string,
-	component: Window,
+	component: Frame,
 	state: 'open' | 'quit',
 	tools: Array<Toolbar>,
 	isDocked: boolean
@@ -44,6 +50,7 @@ export type OsKernel = {
 	toolbar: Array<Toolbar>,
 	toolbarSystem: Array<Toolbar>,
 	menuToolbarSystem: Array<OptionsMenu>,
+	screen: Window,
 	wallpaper: string
 }
 export const kernel: OsKernel = {
@@ -52,6 +59,11 @@ export const kernel: OsKernel = {
 	showLaunchpad: false,
 	showStatusBar: false,
 	lock: false,
+	screen: {
+		maxYOffset:28,
+		width: 900,
+		height: 500
+	},
 	observer: new Map(),
 	applications: [],
 	docked_app: ['finder', 'launchpad', 'settings'],
@@ -123,12 +135,20 @@ export function Os() {
 		return menus;
 	}
 
-	function createWindowConfig(config: Window): Window {
+	function createFrameConfig(config: Frame): Frame {
 		return config;
 	}
 
-	function createToolbar(...tools:Array<Toolbar>){
-		return tools
+	function createWindowConfig(width: number, height: number,maxYOffset:number) {
+		kernel.screen = {
+			maxYOffset:maxYOffset,
+			width: width,
+			height: height
+		};
+	}
+
+	function createToolbar(...tools: Array<Toolbar>) {
+		return tools;
 	}
 
 	function createAppConfig(
@@ -136,7 +156,7 @@ export function Os() {
 			appID: string,
 			appName: string,
 			author: string,
-			component: Window,
+			component: Frame,
 			openWhenStarting: boolean,
 			toolbar: Array<Toolbar>
 		}
@@ -149,7 +169,7 @@ export function Os() {
 			component: config.component,
 			state: config.openWhenStarting ? 'open' : 'quit',
 			isDocked: kernel.docked_app.includes(config.appID),
-			tools:config.toolbar
+			tools: config.toolbar
 		};
 		kernel.applications.push(app);
 	}
@@ -158,7 +178,7 @@ export function Os() {
 	function createSystemToolbar(
 		...config: Array<Toolbar>
 	) {
-		kernel.toolbarSystem = config
+		kernel.toolbarSystem = config;
 	}
 
 	function getOs(): OsKernel {
@@ -201,6 +221,7 @@ export function Os() {
 		createOptionsMenu,
 		createAppConfig,
 		createWindowConfig,
+		createFrameConfig,
 		createSystemToolbar,
 		subscribe,
 		unsubscribe,

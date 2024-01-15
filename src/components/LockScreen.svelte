@@ -5,7 +5,7 @@
 	import Wifi from './SVG/system/wifi/Wifi.svelte';
 	import Battery from './SVG/system/battery/Battery.svelte';
 	import { goto } from '$app/navigation';
-	import {fly} from 'svelte/transition';
+	import { fadeIn, fadeOut } from '$lib/utils/fade';
 
 	const time = createIntervalStore(1000);
 
@@ -29,8 +29,8 @@
 	}}
 />
 <div
-	in:fly={{ x: -200, duration: 300, delay: 1000 }}
-	out:fly={{ x: 200, duration: 300 }}
+	in:fadeIn
+	out:fadeOut
 	class="main-layout w-screen h-screen flex flex-row place-content-center backdrop-blur-sm">
 	<div class="fixed w-screen flex flex-row place-content-end px-2 py-2">
 		<Battery />

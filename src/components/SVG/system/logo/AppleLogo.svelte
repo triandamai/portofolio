@@ -6,9 +6,8 @@ const dispatcher = createEventDispatcher()
 <svg
 	on:click={()=>{dispatcher("down",{})}}
 	xmlns="http://www.w3.org/2000/svg"
-	xmlns:xlink="http://www.w3.org/1999/xlink"
-	viewBox="0,0,256,256" class="place-self-center h-4 mx-2">
-	<g fill="#ffffff" fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter"
+	viewBox="0,0,256,256" class="place-self-center h-4 mx-2 fill-gray-900 dark:fill-white">
+	<g fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter"
 		 stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none"
 		 font-size="none" text-anchor="none" style="mix-blend-mode: normal">
 		<g transform="scale(5.12,5.12)">

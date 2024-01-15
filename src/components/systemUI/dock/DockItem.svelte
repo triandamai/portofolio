@@ -1,10 +1,11 @@
 <script lang="ts">
 	import { interpolate } from 'popmotion';
-	import { spring } from 'svelte/motion';
+	import { spring, tweened } from 'svelte/motion';
 	import { tooltip } from '$lib/utils/tooltip';
 	import ButtonBase from './ButtonBase.svelte';
 	import { browser } from '$app/environment';
-	import { createEventDispatcher } from 'svelte';
+	import { createEventDispatcher, onMount } from 'svelte';
+	import { sineInOut } from 'svelte/easing';
 
 	/** Block 1 */
 
@@ -73,31 +74,48 @@
 		distance = beyondTheDistanceLimit;
 	}
 
+	const bounceItem = tweened(0, {
+		duration: 400,
+		easing: sineInOut
+	});
+
 	function req(mouseX: number | null) {
 		if (browser) {
 			raf = requestAnimationFrame(() => animate(mouseX));
 		}
 	}
 
+	async function bounceEffect() {
+		dispatcher('click');
+		if (appID === 'launchpad') return;
+		// Animate the icon
+		await bounceItem.set(-30);
+		await bounceItem.set(0);
+	}
+
 	$: req(mouseX);
+
 </script>
 
 <section>
 	<ButtonBase
 		on:click={()=>{
-			dispatcher("click")
+			bounceEffect()
 		}}
 		class="dock-button flex flex-col place-self-center">
+		<span style="transform: translate(0,{$bounceItem}px)">
 		<img
 			use:tooltip={appID}
 			bind:this={el}
-			class="app-icon"
+			class="app-icon mb-0.5"
 			src="/app-icons/{appID}/256.png"
 			alt=""
 			style="width: {width};"
+			draggable="false"
 		/>
+			</span>
 		{#if active}
-			<span class="w-1 h-1 bg-gray-900 rounded-full" />
+			<span class="absolute bottom-0 w-1 h-1 bg-gray-900 rounded-full" />
 		{/if}
 	</ButtonBase>
 </section>

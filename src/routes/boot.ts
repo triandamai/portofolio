@@ -45,12 +45,10 @@ kernel.createAppConfig(
 		appName: 'Finder',
 		appID: 'finder',
 		author: 'Trian Damai',
-		component: kernel.createWindowConfig({
+		component: kernel.createFrameConfig({
 			componentName: 'Finder',
 			width: 600,
 			height: 400,
-			x: 0,
-			y: 0,
 			useDefaultPlatform: true
 		}),
 		openWhenStarting: false,
@@ -74,12 +72,10 @@ kernel.createAppConfig(
 		appName: 'Notes',
 		appID: 'notes',
 		author: 'Trian Damai',
-		component: kernel.createWindowConfig({
+		component: kernel.createFrameConfig({
 			componentName: 'Notes',
 			width: 600,
 			height: 400,
-			x: 0,
-			y: 0,
 			useDefaultPlatform: true
 		}),
 		openWhenStarting: false,

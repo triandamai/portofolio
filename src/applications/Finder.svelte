@@ -24,20 +24,14 @@
 </script>
 
 <Cupertino
-	on:down={()=>{
-	dispatcher("move",{})
-}}>
+	on:enableMove
+	on:windowActive
+>
 	<TrafficLight
 		slot="appbar"
-		on:close={()=>{
-			dispatcher('close', {})
-		}}
-		on:minimize={()=>{
-			dispatcher('minimize', {})
-		}}
-		on:maximize={()=>{
-			dispatcher('maximize', {})
-		}}
+		on:close
+		on:minimize
+		on:maximize
 	/>
 	<div class="h-full px-2 overflow-y-scroll">
 		{#each Array(30) as _, i}

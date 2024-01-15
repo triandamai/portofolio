@@ -7,20 +7,15 @@
 
 </script>
 
-<Cupertino on:down={()=>{
-	dispatcher("headerDown",{})
-}}>
+<Cupertino
+	on:enableMove
+	on:windowActive
+>
 	<TrafficLight
 		slot="appbar"
-		on:close={()=>{
-			dispatcher('close', {})
-		}}
-		on:minimize={()=>{
-			dispatcher('minimize', {})
-		}}
-		on:maximize={()=>{
-			dispatcher('maximize', {})
-		}}
+		on:close
+		on:minimize
+		on:maximize
 	/>
 	<p>About app</p>
 </Cupertino>
