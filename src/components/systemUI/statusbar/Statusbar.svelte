@@ -57,18 +57,18 @@
 		<div
 			class="backdrop-blur-md bg-white/30 w-screen h-full flex flex-row place-content-between select-none">
 			<div class="place-self-center h-full flex flex-row">
-				<AppleLogo on:down={()=>{showContextMenu(kernel.menuToolbarSystem,5)}}
+				<AppleLogo class="h-5 mx-2 place-self-center" on:click={()=>{showContextMenu(kernel.menuToolbarSystem,5)}}
 				/>
 				{#each applicationContext?.tools ?? kernel.toolbarSystem as tool}
 					{#if tool.name === applicationContext?.name}
 						<button on:click={(e)=>{showContextMenu(tool?.contextMenu ?? [],	e.target.offsetLeft)}}
-										class=" font-bold text-xs px-2 rounded-sm focus:bg-gray-300 focus:bg-opacity-60 text-gray-900 dark:text-white"
+										class="font-sf-bold text-xs px-2 rounded-sm focus:bg-gray-300 focus:bg-opacity-60 text-gray-900 dark:text-white"
 						>
 							{applicationContext?.name ?? ''}
 						</button>
 					{:else}
 						<button on:click={(e)=>{showContextMenu(tool.contextMenu,e.target.offsetLeft)}}
-										class="mx-0.5 min-w-max h-full text-center text-xs cursor-default focus:bg-gray-300 focus:bg-opacity-60 rounded-sm px-3 text-gray-900 dark:text-white">
+										class="mx-0.5 min-w-max h-full text-center text-sm font-sf-regular cursor-default focus:bg-gray-300 focus:bg-opacity-60 rounded-sm px-3 text-gray-900 dark:text-white">
 							{tool.name}
 						</button>
 					{/if}
@@ -76,9 +76,19 @@
 				{/each}
 			</div>
 			<div class="place-self-center flex flex-row">
-				<Battery battery={50} />
-				<Wifi state={'no-connection'} />
-				<ActionToggle />
+				<Battery
+					battery={50}
+					class="place-self-center h-4 mx-2 fill-gray-900 dark:fill-white"
+				/>
+				<Wifi
+					state={'no-connection'}
+					class="place-self-center h-4 mx-2 fill-gray-900 dark:fill-white"
+				/>
+				<ActionToggle
+					class="place-self-center h-4 px-2 fill-gray-900 dark:fill-white"
+					on:click={({detail})=>{
+					dispatcher("systemui",detail.screenX)
+				}} />
 				<Siri />
 				<StatusbarTime />
 			</div>

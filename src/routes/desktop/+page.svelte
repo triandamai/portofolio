@@ -10,6 +10,7 @@
 	import Launchpad from '../../components/systemUI/launchpad/Launchpad.svelte';
 	import { normalizePosition, updateElementZ } from '../../components/systemUI/window/window';
 	import StatusbarContext from '../../components/systemUI/context/StatusbarContext.svelte';
+	import SystemUiContext from '../../components/systemUI/context/SystemUiContext.svelte';
 
 
 	const { createWindowConfig } = Os();
@@ -17,6 +18,8 @@
 	let statusBar: Statusbar;
 	let statusBarMenuContext: StatusbarContext;
 	let launchpad: Launchpad;
+	let dock: Dock;
+	let systemUI: SystemUiContext;
 
 	let maxYOffset: number = 0;
 	let moving: boolean = false;
@@ -31,12 +34,26 @@
 		return await import(`../../applications/${componentName}.svelte`);
 	}
 
+	function showStatusBarAndDock(show: boolean = true) {
+		if (show) {
+			statusBar.show();
+			dock.show();
+		} else {
+			statusBar.hide();
+			dock.hide();
+		}
+	}
+
 
 	function onMinimizeApp(detail: Application) {
 		if (!activeApp) return;
+		if (activeApp.size === 'max') {
+			showStatusBarAndDock(true);
+		}
 		let data = activeApp;
 		data.state = 'idle';
 		listStateApp.set(detail.appID, data);
+		activeApp = null;
 		listStateApp = listStateApp;
 	}
 
@@ -44,13 +61,18 @@
 		if (activeApp == null) return;
 		let oldActive = activeApp;
 		if (activeApp.size === 'min') {
+			showStatusBarAndDock(false);
 			oldActive.size = 'max';
 			oldActive.width = screen.width;
 			oldActive.height = screen.height;
 		} else {
+			showStatusBarAndDock(true);
 			oldActive.size = 'min';
-			oldActive.x = activeApp.x
-			oldActive.y = activeApp.y
+			oldActive.x = activeApp.x;
+			if (oldActive.y < maxYOffset) {
+				oldActive.y = maxYOffset;
+			}
+
 			oldActive.width = app.component.width;
 			oldActive.height = app.component.height;
 		}
@@ -94,6 +116,8 @@
 				if (findApp) {
 					findApp.state = 'open';
 					findApp.z = listStateApp.size + 1;
+					findApp.x = x;
+					findApp.y = y;
 
 					activeApp = findApp;
 					listStateApp = normalizePosition(listStateApp, findApp);
@@ -114,7 +138,9 @@
 						z: index(),
 						size: 'min',
 						width: findAppFromList.component.width,
-						height: findAppFromList.component.height
+						height: findAppFromList.component.height,
+						y: maxYOffset,
+						x: 0
 					};
 					prevData.set(findAppFromList.appID, newData);
 					activeApp = newData;
@@ -178,10 +204,17 @@
 		createWindowConfig(w, h, maxYOffset);
 	});
 </script>
-<DesktopMenuContext />
+<DesktopMenuContext
+	kernel={kernel}
+/>
 <StatusbarContext
 	bind:this={statusBarMenuContext}
+	kernel={kernel}
 	on:clickOutside={({detail})=>{detail()}}
+/>
+<SystemUiContext
+	bind:this={systemUI}
+	kernel={kernel}
 />
 <div
 	in:fadeIn
@@ -205,12 +238,15 @@
 		on:showMenuContext={({detail})=>{
 			statusBarMenuContext.show(detail.x,detail.y,detail.contextMenu)
 		}}
+		on:systemui={({detail})=>{
+			systemUI.show(detail,maxYOffset)
+		}}
 	/>
 
 	<div
 		use:moveApp
 		class="z-0 flex flex-col justify-between h-screen">
-		{#each kernel.applications as manifest,index}
+		{#each kernel.applications as manifest}
 			{#await loadComponent(manifest.component.componentName) then app}
 				<DesktopContainer
 					applicationContext={manifest}
@@ -221,13 +257,15 @@
 						this={app.default}
 						on:enableMove={()=>{
 								moving = true
-								activeApp = null
-								getCurrentPosition(manifest.appID)
+								if(activeApp.size !== "max"){
+									getCurrentPosition(manifest.appID)
+								}
 							}}
 						on:windowActive={()=>{
-								moving = true
-								activeApp = null
-								getCurrentPosition(manifest.appID)
+								moving = false
+								if(activeApp.size !== "max"){
+										getCurrentPosition(manifest.appID)
+								}
 							}}
 						on:close={()=>{
 								onCloseApp(manifest)
@@ -244,6 +282,7 @@
 		{/each}
 	</div>
 	<Dock
+		bind:this={dock}
 		on:click={onAppIconClick}
 		activeApplication={listStateApp}
 	/>

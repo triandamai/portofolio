@@ -4,9 +4,9 @@ import { createEventDispatcher } from 'svelte';
 const dispatcher = createEventDispatcher()
 </script>
 <svg
-	on:click={()=>{dispatcher("down",{})}}
+	on:click={()=>{dispatcher("click",{})}}
 	xmlns="http://www.w3.org/2000/svg"
-	viewBox="0,0,256,256" class="place-self-center h-4 mx-2 fill-gray-900 dark:fill-white">
+	viewBox="0,0,256,256" class="fill-gray-900 dark:fill-white" {...$$props}>
 	<g fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter"
 		 stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none"
 		 font-size="none" text-anchor="none" style="mix-blend-mode: normal">

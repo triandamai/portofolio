@@ -18,7 +18,8 @@
 		dispatcher(event, {});
 	}
 
-	function enableMove(_: MouseEvent) {
+	function enableMove(event: MouseEvent) {
+		if((event.target as HTMLElement).id.startsWith("traffic-light")) return
 		sendEvent('enableMove');
 	}
 
@@ -54,7 +55,7 @@
 	{:else if style === 'basic-sidebar'}
 		<div class="w-full h-full flex flex-row">
 			<!--			sidebar 		-->
-			<div class="w-1/4 flex flex-col text-sm font-sf-bold">
+			<div class="w-1/4 lg:w-1/6 md:w-1/6 flex flex-col text-sm font-sf-bold">
 				<div id={idAppBar} bind:this={appbar} style="height: {headerHeight}px;"
 						 class="place-content-center select-none">
 					<slot name="appbar" />

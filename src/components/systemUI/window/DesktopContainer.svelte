@@ -23,7 +23,6 @@
 
 	let show: boolean = false;
 	let app: HTMLDivElement;
-	let dispatcher = createEventDispatcher();
 
 	export function move(state: ApplicationState | null) {
 		if (state === null) return;
@@ -32,12 +31,11 @@
 		width.set(state.width);
 		height.set(state.height);
 		if (state.size === 'min') {
-
 			app.style.left = `${state.x}px`;
 			app.style.top = `${state.y}px`;
 		} else {
 			app.style.left = `0px`;
-			app.style.top = `${maxYOffset}px`;
+			app.style.top = `0px`;
 		}
 	}
 

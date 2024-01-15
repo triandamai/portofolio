@@ -8,6 +8,15 @@
 	export let activeApplication: Map<string, ApplicationState> = [];
 	let mouseX: number | null = null;
 	let isDividerShow: boolean = false;
+	let isShow: boolean = true;
+
+	export function show() {
+		isShow = true;
+	}
+
+	export function hide() {
+		isShow = false;
+	}
 
 	function onItemClick(appID: string) {
 		dispatcher('click', {
@@ -29,42 +38,44 @@
 
 	$: showDivider(activeApplication);
 </script>
-<div
-	class="fixed bottom-0 z-10 h-10 w-screen flex flex-row">
-	<div class="dock-container">
-		<div
-			class="dock-el rounded-2xl backdrop-blur-md bg-white/30"
-			on:mousemove={(event)=>(mouseX = event.x)}
-			on:mouseleave={()=>(mouseX = null)}
-		>
-			<DockItem
-				mouseX={mouseX}
-				appID="launchpad"
-				active={false}
-				on:click={()=>{onItemClick('launchpad')}}
-			/>
-			<DockItem
-				mouseX={mouseX}
-				appID="finder"
-				active={activeApplication.get('finder')?.state !== 'close'}
-				on:click={()=>{onItemClick('finder')}}
-			/>
-			{#if isDividerShow}
-				<div class="divider bg-gray-900" aria-hidden="true" />
-			{/if}
-			{#each [...activeApplication] as [key, app]}
-				{#if key !== 'finder'}
-					<DockItem
-						mouseX={mouseX}
-						appID={app.context.appID}
-						active={activeApplication.get(key)?.state !== 'close'}
-						on:click={()=>{onItemClick(key)}}
-					/>
+{#if isShow}
+	<div
+		class="fixed bottom-0 z-10 h-10 w-screen flex flex-row">
+		<div class="dock-container">
+			<div
+				class="dock-el rounded-2xl backdrop-blur-md bg-white/30"
+				on:mousemove={(event)=>(mouseX = event.x)}
+				on:mouseleave={()=>(mouseX = null)}
+			>
+				<DockItem
+					mouseX={mouseX}
+					appID="launchpad"
+					active={false}
+					on:click={()=>{onItemClick('launchpad')}}
+				/>
+				<DockItem
+					mouseX={mouseX}
+					appID="finder"
+					active={activeApplication.get('finder')?.state !== 'close'}
+					on:click={()=>{onItemClick('finder')}}
+				/>
+				{#if isDividerShow}
+					<div class="divider bg-gray-900" aria-hidden="true" />
 				{/if}
-			{/each}
+				{#each [...activeApplication] as [key, app]}
+					{#if key !== 'finder'}
+						<DockItem
+							mouseX={mouseX}
+							appID={app.context.appID}
+							active={activeApplication.get(key)?.state !== 'close'}
+							on:click={()=>{onItemClick(key)}}
+						/>
+					{/if}
+				{/each}
+			</div>
 		</div>
 	</div>
-</div>
+{/if}
 <style lang="scss">
   .dock-container {
     margin-bottom: 0.3rem;

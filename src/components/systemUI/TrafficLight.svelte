@@ -5,9 +5,10 @@
 	import StretchSVG from '../SVG/traffic-lights/StretchSVG.svelte';
 
 	let dispatcher = createEventDispatcher();
+	let uniq = `traffic-light-${Math.random()}`;
 </script>
 
-<div class="min-w-max max-w-min px-2 py-2 container flex flex-row">
+<div id={uniq} class="min-w-max max-w-min px-2 py-2 container flex flex-row">
 	<button class="close-light p-0.5" on:click={() => dispatcher('close', {})}>
 		<CloseSVG />
 	</button>
@@ -46,17 +47,18 @@
       }
     }
   }
-	button{
-		height: var(--button-size);
+
+  button {
+    height: var(--button-size);
     width: var(--button-size);
 
-		border-radius: 50%;
+    border-radius: 50%;
 
-		background-color: var(--bgcolor);
-		box-shadow: 0 0 0 0.5px var(--border-color);
+    background-color: var(--bgcolor);
+    box-shadow: 0 0 0 0.5px var(--border-color);
 
-		transition: transform 100ms ease-in;
-	}
+    transition: transform 100ms ease-in;
+  }
 
   .close-light {
     --bgcolor: #ff5f56;

@@ -1,6 +1,9 @@
 <script lang="ts">
 	import MenuContext from '../../framework/MenuContext.svelte';
 	import MenuContextItem from '../../framework/MenuContextItem.svelte';
+	import type { OsKernel } from '$lib/manifest/application.manifest';
+
+	export let kernel: OsKernel;
 
 	let contextMenu: MenuContext;
 </script>
@@ -15,6 +18,7 @@
 />
 <MenuContext
 	bind:this={contextMenu}
+	kernel={kernel}
 	on:clickOutside={({detail})=>{
 		detail()
 	}}
@@ -22,7 +26,7 @@
 	<MenuContextItem
 		type="button"
 		name="New Folder"
-		on:itemClick={({detail})=>{
+		on:itemClick={()=>{
 				contextMenu.hide()
 		}}
 	/>
