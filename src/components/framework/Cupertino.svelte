@@ -8,8 +8,12 @@
 	let body: HTMLDivElement | undefined;
 	let sidebar: HTMLDivElement | undefined;
 
+	export let appWidth:number
+	export let appHeight:number
+
 	let headerHeight: number = 50;
 	let bodyHeight: number = 0;
+	let sideBarWidth:number=200;
 	let dispatcher = createEventDispatcher();
 	let idHeader = `id-header-${Math.random()}`;
 	let idAppBar = `id-appbar-${Math.random()}`;
@@ -26,6 +30,14 @@
 	function windowActive(_: MouseEvent) {
 		sendEvent('windowActive');
 	}
+
+	function measureBodyHeight(width:number,height:number){
+		if(height > headerHeight){
+			bodyHeight = height - headerHeight
+		}
+	}
+
+	$: measureBodyHeight(appWidth,appHeight)
 
 	onMount(() => {
 		appbar?.addEventListener('mousedown', enableMove);
@@ -55,7 +67,7 @@
 	{:else if style === 'basic-sidebar'}
 		<div class="w-full h-full flex flex-row">
 			<!--			sidebar 		-->
-			<div class="w-1/4 lg:w-1/6 md:w-1/6 flex flex-col text-sm font-sf-bold">
+			<div class="flex flex-col text-sm font-sf-bold" style="width: {sideBarWidth}px;">
 				<div id={idAppBar} bind:this={appbar} style="height: {headerHeight}px;"
 						 class="place-content-center select-none">
 					<slot name="appbar" />

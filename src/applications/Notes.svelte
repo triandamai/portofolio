@@ -7,6 +7,8 @@
 	const dispatcher = createEventDispatcher();
 
 	const { subscribe, unsubscribe, getOs } = Os();
+	export let width:number
+	export let height:number
 
 	onMount(() => {
 		subscribe('selected-menu', 'notes', (data) => {
@@ -24,6 +26,8 @@
 
 <Cupertino
 	style={'basic-sidebar'}
+	appWidth={width}
+	appHeight={height}
 	on:enableMove
 	on:windowActive
 >

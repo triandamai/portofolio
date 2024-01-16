@@ -2,7 +2,7 @@
 	import { clickOutside } from '$lib/utils/clickoutside';
 	import { fadeIn, fadeOut } from '$lib/utils/fade';
 	import { createEventDispatcher, onMount } from 'svelte';
-	import { Os, type OsKernel } from '$lib/manifest/application.manifest';
+	import { type OsKernel } from '$lib/manifest/application.manifest';
 
 	let dispatcher = createEventDispatcher();
 	let isShow: boolean = false;
@@ -59,7 +59,7 @@
 {#if isShow}
 	<div
 		bind:this={element}
-		class="fixed backdrop-blur-3xl shadow-md bg-white/30 max-w-max py-1 px-1 select-none {rounded} my-1 mx-1 flex flex-col"
+		class="fixed backdrop-blur-md shadow-2xl bg-white/30 dark:bg-gray-600 dark:bg-opacity-40 dark:backdrop-blur-md max-w-max py-1 px-1 select-none {rounded} my-1 mx-1 flex flex-col"
 		style="z-index: 999;left: {positionX}px; top:{positionY}px;"
 		in:fadeIn
 		out:fadeOut

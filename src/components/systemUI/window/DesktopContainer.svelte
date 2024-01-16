@@ -24,7 +24,7 @@
 	let show: boolean = false;
 	let app: HTMLDivElement;
 
-	export function move(state: ApplicationState | null) {
+	export function move(state: ApplicationState | null,app:HTMLDivElement) {
 		if (state === null) return;
 		if (state.context.appID !== applicationContext.appID) return;
 		if (!app) return;
@@ -35,7 +35,7 @@
 			app.style.top = `${state.y}px`;
 		} else {
 			app.style.left = `0px`;
-			app.style.top = `0px`;
+			app.style.top = `${kernel.screen.maxYOffset}px`;
 		}
 	}
 
@@ -60,7 +60,7 @@
 		maxYOffset = kernel.screen.maxYOffset;
 	}
 
-	$: move(activeApplication);
+	$: move(activeApplication,app);
 	$: initApp(applicationContext);
 	$: initContext(kernel);
 	$: detectWindow(applicationsState);
@@ -72,9 +72,9 @@
 		bind:this={app}
 		in:fadeIn
 		out:fadeOut
-		class="backdrop-blur-[500px] bg-white/40 absolute shadow-2xl rounded-md"
+		class="backdrop-blur-[500px] bg-white/40 dark:bg-gray-900 dark:bg-opacity-40 absolute shadow-2xl rounded-md"
 		style="width: {$width}px;height:{$height}px; left:10px; top:28px; z-index:1;"
 	>
-		<slot />
+		<slot  width={$width} height={$height}/>
 	</div>
 {/if}

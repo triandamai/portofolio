@@ -21,6 +21,7 @@
 	let dock: Dock;
 	let systemUI: SystemUiContext;
 
+	let screenHeight: number = 0;
 	let maxYOffset: number = 0;
 	let moving: boolean = false;
 	let oldY: number = 0;
@@ -36,10 +37,8 @@
 
 	function showStatusBarAndDock(show: boolean = true) {
 		if (show) {
-			statusBar.show();
 			dock.show();
 		} else {
-			statusBar.hide();
 			dock.hide();
 		}
 	}
@@ -52,6 +51,9 @@
 		}
 		let data = activeApp;
 		data.state = 'idle';
+		data.size = 'min';
+		data.width = detail.component.width;
+		data.height = detail.component.height;
 		listStateApp.set(detail.appID, data);
 		activeApp = null;
 		listStateApp = listStateApp;
@@ -72,7 +74,6 @@
 			if (oldActive.y < maxYOffset) {
 				oldActive.y = maxYOffset;
 			}
-
 			oldActive.width = app.component.width;
 			oldActive.height = app.component.height;
 		}
@@ -191,7 +192,6 @@
 			moving = false;
 		});
 	}
-
 	onMount(() => {
 		//initialize default y position for apps
 		if (statusBar) {
@@ -202,8 +202,12 @@
 		let w = screen.width;
 		let h = screen.height;
 		createWindowConfig(w, h, maxYOffset);
+		if (browser) {
+			screenHeight = window.innerHeight;
+		}
 	});
 </script>
+<svelte:window on:resize={(e)=>(screenHeight = window.innerHeight)} />
 <DesktopMenuContext
 	kernel={kernel}
 />
@@ -216,6 +220,7 @@
 	bind:this={systemUI}
 	kernel={kernel}
 />
+
 <div
 	in:fadeIn
 	out:fadeOut
@@ -252,9 +257,14 @@
 					applicationContext={manifest}
 					activeApplication={activeApp}
 					applicationsState={listStateApp}
-					kernel={kernel}>
+					kernel={kernel}
+					let:width
+					let:height
+				>
 					<svelte:component
 						this={app.default}
+						width={width}
+						height={height}
 						on:enableMove={()=>{
 								moving = true
 								if(activeApp.size !== "max"){

@@ -43,6 +43,7 @@ export type OsKernel = {
 	password: string,
 	showLaunchpad: boolean,
 	showStatusBar: boolean,
+	isDark:boolean,
 	lock: boolean,
 	observer: Map<osEvent, Map<string, (data: any) => void>>,
 	applications: Array<Application>,
@@ -58,6 +59,7 @@ export const kernel: OsKernel = {
 	password: '',
 	showLaunchpad: false,
 	showStatusBar: false,
+	isDark:false,
 	lock: false,
 	screen: {
 		maxYOffset:28,
@@ -133,6 +135,10 @@ export function Os() {
 			menus = [...menus, ...merge];
 		});
 		return menus;
+	}
+
+	function changeTheme(isDark:boolean=false){
+		kernel.isDark = isDark
 	}
 
 	function createFrameConfig(config: Frame): Frame {
@@ -227,6 +233,7 @@ export function Os() {
 		unsubscribe,
 		publishEvent,
 		broadcastEvent,
-		getOs
+		getOs,
+		changeTheme
 	};
 }

@@ -10,6 +10,8 @@
 	let isDividerShow: boolean = false;
 	let isShow: boolean = true;
 
+
+
 	export function show() {
 		isShow = true;
 	}

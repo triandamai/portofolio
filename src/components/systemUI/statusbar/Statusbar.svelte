@@ -57,7 +57,7 @@
 		<div
 			class="backdrop-blur-md bg-white/30 w-screen h-full flex flex-row place-content-between select-none">
 			<div class="place-self-center h-full flex flex-row">
-				<AppleLogo class="h-5 mx-2 place-self-center" on:click={()=>{showContextMenu(kernel.menuToolbarSystem,5)}}
+				<AppleLogo class="h-5 mx-2 place-self-center fill-gray-900 dark:fill-white" on:click={()=>{showContextMenu(kernel.menuToolbarSystem,5)}}
 				/>
 				{#each applicationContext?.tools ?? kernel.toolbarSystem as tool}
 					{#if tool.name === applicationContext?.name}
