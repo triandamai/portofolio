@@ -4,6 +4,7 @@
 	const dispatcher = createEventDispatcher()
 
 </script>
+<!-- svelte-ignore a11y-no-static-element-interactions -->
 <svg
 	{...$$props}
 	xmlns="http://www.w3.org/2000/svg"

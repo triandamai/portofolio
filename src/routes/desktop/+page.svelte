@@ -2,7 +2,9 @@
 	import { onMount } from 'svelte';
 	import { browser } from '$app/environment';
 	import { fadeOut, fadeIn } from '$lib/utils/fade';
-	import { type Application, type ApplicationState, kernel, Os } from '$lib/manifest/application.manifest';
+	import type { Application, ApplicationState } from '$lib/kernel/type';
+	import { Os, kernel, registerEvent, unregisterEvent } from '$lib/kernel/kernel';
+
 	import Dock from '../../components/systemUI/dock/Dock.svelte';
 	import DesktopMenuContext from '../../components/systemUI/context/DesktopContext.svelte';
 	import Statusbar from '../../components/systemUI/statusbar/Statusbar.svelte';
@@ -11,7 +13,17 @@
 	import { normalizePosition, updateElementZ } from '../../components/systemUI/window/window';
 	import StatusbarContext from '../../components/systemUI/context/StatusbarContext.svelte';
 	import SystemUiContext from '../../components/systemUI/context/SystemUiContext.svelte';
-
+	import {
+		notifyPositionChanged,
+		notifyAppClose,
+		notifyAppMaximize,
+		notifyAppOpen,
+		notifyAppMinimize,
+		currentApplication,
+		updateActiveApplication,
+		closeApplication,
+		activeApplication
+	} from '$lib/kernel/application/application';
 
 	const { createWindowConfig } = Os();
 
@@ -24,143 +36,136 @@
 	let screenHeight: number = 0;
 	let maxYOffset: number = 0;
 	let moving: boolean = false;
+
 	let oldY: number = 0;
 	let y: number = 300;
 	let x: number = 100;
-
-	let activeApp: ApplicationState | null = null;
-	let listStateApp: Map<string, ApplicationState> = new Map<string, ApplicationState>();
 
 	async function loadComponent(componentName: string) {
 		return await import(`../../applications/${componentName}.svelte`);
 	}
 
-	function showStatusBarAndDock(show: boolean = true) {
-		if (show) {
-			dock.show();
-		} else {
-			dock.hide();
-		}
-	}
-
-
 	function onMinimizeApp(detail: Application) {
-		if (!activeApp) return;
-		if (activeApp.size === 'max') {
-			showStatusBarAndDock(true);
+		if (!$currentApplication) return;
+		if ($currentApplication.size === 'max') {
+			statusBar.show();
+			dock.show();
 		}
-		let data = activeApp;
-		data.state = 'idle';
-		data.size = 'min';
-		data.width = detail.component.width;
-		data.height = detail.component.height;
-		listStateApp.set(detail.appID, data);
-		activeApp = null;
-		listStateApp = listStateApp;
+		const activeApp = $currentApplication;
+		activeApp.height = detail.component.height;
+		activeApp.width = detail.component.width;
+		activeApp.state = 'idle';
+		activeApp.size = 'min';
+		notifyAppMinimize(detail.appID, detail.component.width, detail.component.height);
+		updateActiveApplication(activeApp);
+		currentApplication.set(null);
 	}
 
 	function onMaximizeApp(app: Application) {
-		if (activeApp == null) return;
-		let oldActive = activeApp;
-		if (activeApp.size === 'min') {
-			showStatusBarAndDock(false);
+		if ($currentApplication == null) return;
+		let oldActive = $currentApplication;
+		if ($currentApplication.size === 'min') {
+			statusBar.hide();
+			dock.hide();
+			notifyAppMaximize(app.appID, screen.width, screen.height, 0, 0);
 			oldActive.size = 'max';
-			oldActive.width = screen.width;
-			oldActive.height = screen.height;
 		} else {
-			showStatusBarAndDock(true);
-			oldActive.size = 'min';
-			oldActive.x = activeApp.x;
+			statusBar.show();
+			dock.show();
 			if (oldActive.y < maxYOffset) {
 				oldActive.y = maxYOffset;
 			}
-			oldActive.width = app.component.width;
-			oldActive.height = app.component.height;
+			notifyAppMaximize(
+				app.appID,
+				app.component.width,
+				app.component.height,
+				oldActive.x,
+				oldActive.y
+			);
+			oldActive.size = 'min';
 		}
-		activeApp = oldActive;
+		currentApplication.set(oldActive);
+	}
+
+	function openFinder() {
+		const app = kernel.applications.find((app) => app.appID === 'finder');
+		if (app) {
+			openApp(app);
+		}
 	}
 
 	function onCloseApp(detail: Application) {
-		if (activeApp) {
-			activeApp.state = 'close';
-			listStateApp.set(detail.appID, activeApp);
-			listStateApp = listStateApp;
-			activeApp = null;
+		if ($currentApplication) {
+			currentApplication.set(null);
+			notifyAppClose(detail.appID);
+			closeApplication(detail.appID);
 		}
 	}
 
 	function showLaunchpad() {
 		if (launchpad.displayed()) {
-			hideLaunchpad();
+			statusBar.show();
+			launchpad.hide();
 		} else {
 			statusBar.hide();
 			launchpad.show();
 		}
 	}
 
-	function hideLaunchpad() {
-		statusBar.show();
+	function openApp(data: Application) {
 		launchpad.hide();
-	}
+		//update or insert to list active app
+		const listActiveApplication = $activeApplication;
+		if (listActiveApplication.has(data.appID)) {
+			//open
+			let findApp = listActiveApplication.get(data.appID);
+			if (findApp) {
+				findApp.state = 'open';
+				findApp.z = listActiveApplication.size + 1;
+				findApp.x = x;
+				findApp.y = y;
 
-
-	function onAppIconClick(data: { detail: { appID: string } }) {
-		const detail = data.detail;
-		if (detail.appID === 'launchpad') {
-			showLaunchpad();
+				currentApplication.set(findApp);
+				notifyAppOpen($currentApplication?.context.appID ?? '');
+				activeApplication.set(normalizePosition($activeApplication, findApp));
+				updateElementZ($activeApplication, data.appID);
+			}
 		} else {
-			hideLaunchpad();
-			//update or insert to list active app
-			if (listStateApp.has(detail.appID)) {
-				//open
-				let findApp = listStateApp.get(detail.appID);
-				if (findApp) {
-					findApp.state = 'open';
-					findApp.z = listStateApp.size + 1;
-					findApp.x = x;
-					findApp.y = y;
-
-					activeApp = findApp;
-					listStateApp = normalizePosition(listStateApp, findApp);
-					updateElementZ(listStateApp, detail.appID);
-				}
-			} else {
-				//insert from applications to active
-				let findAppFromList = kernel.applications.find((v) => v.appID === detail.appID);
-				if (findAppFromList) {
-					let prevData = listStateApp;
-					const index = () => {
-						if (listStateApp.size < 0) return 1;
-						else return listStateApp.size;
-					};
-					let newData: ApplicationState = {
-						state: 'open',
-						context: findAppFromList,
-						z: index(),
-						size: 'min',
-						width: findAppFromList.component.width,
-						height: findAppFromList.component.height,
-						y: maxYOffset,
-						x: 0
-					};
-					prevData.set(findAppFromList.appID, newData);
-					activeApp = newData;
-					listStateApp = normalizePosition(prevData, newData);
-					updateElementZ(listStateApp, detail.appID);
-				}
+			//insert from applications to active
+			let findAppFromList = kernel.applications.find((app) => app.appID === data.appID);
+			if (findAppFromList) {
+				const index = () => {
+					if (listActiveApplication.size < 0) return 1;
+					else return listActiveApplication.size;
+				};
+				const newData: ApplicationState = {
+					state: 'open',
+					context: findAppFromList,
+					z: index(),
+					size: 'min',
+					width: findAppFromList.component.width,
+					height: findAppFromList.component.height,
+					y: maxYOffset,
+					x: 0
+				};
+				$activeApplication.set(findAppFromList.appID, newData);
+				currentApplication.set(newData);
+				notifyAppOpen($currentApplication?.context.appID ?? '');
+				activeApplication.set(normalizePosition(listActiveApplication, newData));
+				updateElementZ($activeApplication, data.appID);
 			}
 		}
 	}
 
-	function getCurrentPosition(appID: string) {
+	function getCurrentPosition(app: Application) {
 		if (browser) {
-			let component = document.getElementById(appID);
+			let component = document.getElementById(app.appID);
 			if (component) {
 				y = component.offsetTop;
 				x = component.offsetLeft;
 			}
 		}
-		onAppIconClick({ detail: { appID: appID } });
+		openApp(app);
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -179,11 +184,15 @@
 					y += e.movementY;
 				}
 				oldY = e.pageY;
-				if (activeApp) {
-					let old = activeApp;
-					old.x = x;
-					old.y = y;
-					activeApp = old;
+				if ($currentApplication?.size === 'min') {
+					currentApplication.update((old) => {
+						if (old) {
+							old.x = x;
+							old.y = y;
+						}
+						return old;
+					});
+					notifyPositionChanged($currentApplication?.context.appID ?? '', x, y);
 				}
 			}
 		});
@@ -195,9 +204,13 @@
 	onMount(() => {
 		//initialize default y position for apps
 		if (statusBar) {
+			statusBar.show();
 			const statusbarInfo = statusBar.getStatusbarInfo();
-			maxYOffset = (statusbarInfo.height + statusbarInfo.x);
+			maxYOffset = statusbarInfo.height + statusbarInfo.x;
 			y = maxYOffset;
+		}
+		if (dock) {
+			dock.show();
 		}
 		let w = screen.width;
 		let h = screen.height;
@@ -205,105 +218,118 @@
 		if (browser) {
 			screenHeight = window.innerHeight;
 		}
+
+		registerEvent({
+			onEnableMoveApp: function (target: Application): void {
+				if ($currentApplication?.size !== 'max') {
+					moving = true;
+					getCurrentPosition(target);
+				}
+			},
+			onAppActiveChanged: function (target: Application): void {
+				getCurrentPosition(target);
+			},
+			openApp: function (target: Application): void {
+				openApp(target);
+			},
+			closeApp: function (target: Application): void {
+				onCloseApp(target);
+			},
+			minimizeApp: function (target: Application): void {
+				onMinimizeApp(target);
+			},
+			maximizeApp: function (target: Application): void {
+				onMaximizeApp(target);
+			}
+		});
+
+		return () => {
+			unregisterEvent();
+		};
 	});
 </script>
-<svelte:window on:resize={(e)=>(screenHeight = window.innerHeight)} />
-<DesktopMenuContext
-	kernel={kernel}
+
+<svelte:window
+	on:resize={(e) => (screenHeight = window.innerHeight)}
+	on:mousemove={(e) => {
+		if ($currentApplication?.size === 'max') {
+			if (!statusBar.getStatusbarInfo().isShow) {
+				if (e.y < 10) {
+					statusBar.show();
+				}
+			} else {
+				if (e.y > maxYOffset) {
+					statusBar.hide();
+				}
+			}
+
+			if (e.y >= screenHeight - 50) {
+				dock.show();
+			} else {
+				dock.hide();
+			}
+		}
+	}}
 />
+<DesktopMenuContext {kernel} />
 <StatusbarContext
 	bind:this={statusBarMenuContext}
-	kernel={kernel}
-	on:clickOutside={({detail})=>{detail()}}
+	{kernel}
+	on:clickOutside={({ detail }) => {
+		detail();
+	}}
 />
-<SystemUiContext
-	bind:this={systemUI}
-	kernel={kernel}
-/>
+<SystemUiContext bind:this={systemUI} {kernel} />
 
-<div
-	in:fadeIn
-	out:fadeOut
-	class="main-layout w-screen h-screen relative">
+<div in:fadeIn out:fadeOut class="main-layout w-screen h-screen relative">
 	<Launchpad
 		bind:this={launchpad}
-		kernel={kernel}
-		on:clickOutside={({detail})=>{
-			hideLaunchpad()
-			detail()
+		{kernel}
+		on:clickOutside={({ detail }) => {
+			launchpad.hide();
+			statusBar.show();
+			detail();
 		}}
-		on:click={(event)=>{
-			onAppIconClick(event)
+		on:click={({ detail }) => {
+			openApp(detail);
 		}}
 	/>
 	<Statusbar
 		bind:this={statusBar}
-		applicationContext={activeApp}
-		kernel={kernel}
-		on:showMenuContext={({detail})=>{
-			statusBarMenuContext.show(detail.x,detail.y,detail.contextMenu)
+		applicationContext={$currentApplication}
+		{kernel}
+		on:showMenuContext={({ detail }) => {
+			statusBarMenuContext.show(detail.x, detail.y, detail.contextMenu);
 		}}
-		on:systemui={({detail})=>{
-			systemUI.show(detail,maxYOffset)
+		on:systemui={({ detail }) => {
+			systemUI.show(detail, maxYOffset);
 		}}
 	/>
 
-	<div
-		use:moveApp
-		class="z-0 flex flex-col justify-between h-screen">
+	<div use:moveApp class="z-0 flex flex-col justify-between h-screen">
 		{#each kernel.applications as manifest}
 			{#await loadComponent(manifest.component.componentName) then app}
-				<DesktopContainer
-					applicationContext={manifest}
-					activeApplication={activeApp}
-					applicationsState={listStateApp}
-					kernel={kernel}
-					let:width
-					let:height
-				>
-					<svelte:component
-						this={app.default}
-						width={width}
-						height={height}
-						on:enableMove={()=>{
-								moving = true
-								if(activeApp.size !== "max"){
-									getCurrentPosition(manifest.appID)
-								}
-							}}
-						on:windowActive={()=>{
-								moving = false
-								if(activeApp.size !== "max"){
-										getCurrentPosition(manifest.appID)
-								}
-							}}
-						on:close={()=>{
-								onCloseApp(manifest)
-							}}
-						on:minimize={()=>{
-								onMinimizeApp(manifest)
-							}}
-						on:maximize={()=>{
-								onMaximizeApp(manifest)
-							}}
-					/>
+				<DesktopContainer context={manifest} {kernel} let:width let:height>
+					<svelte:component this={app.default} {width} {height} context={manifest} />
 				</DesktopContainer>
 			{/await}
 		{/each}
 	</div>
 	<Dock
 		bind:this={dock}
-		on:click={onAppIconClick}
-		activeApplication={listStateApp}
+		activeApplication={$activeApplication}
+		on:click={({ detail }) => openApp(detail)}
+		on:finder={openFinder}
+		on:launchpad={(e) => showLaunchpad()}
 	/>
 </div>
 
 <style>
-    .main-layout {
-        position: fixed;
-        background-image: url($lib/walpaper/big-sur-7.jpg);
-        background-repeat: no-repeat;
-        background-size: cover;
-        background-color: #949494;
-    }
+	.main-layout {
+		position: fixed;
+		background-image: url($lib/walpaper/big-sur-7.jpg);
+		background-repeat: no-repeat;
+		background-size: cover;
+		background-color: #949494;
+	}
 </style>

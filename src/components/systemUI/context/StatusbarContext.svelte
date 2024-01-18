@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { type OptionsMenu, Os, type OsKernel } from '$lib/manifest/application.manifest';
+	import type { OptionsMenu,OsKernel} from '$lib/kernel/type';
 	import { goto } from '$app/navigation';
 	import MenuContext from '../../framework/MenuContext.svelte';
 	import MenuContextItem from '../../framework/MenuContextItem.svelte';
+	import { currentApplication, notifySelectedStatusBar } from '$lib/kernel/application/application';
 
-	const {broadcastEvent} = Os()
 	export let menuContextData:Array<OptionsMenu> = []
 	export let kernel:OsKernel
 	let menuContext:MenuContext
@@ -30,7 +30,7 @@
 					if(context.name === 'LockScreen' || context.name === 'Log Out'){
 						goto("/lock")
 					}else {
-						broadcastEvent("ini data")
+						notifySelectedStatusBar($currentApplication?.context.appID ?? '',context)
 					}
 			}}
 		/>

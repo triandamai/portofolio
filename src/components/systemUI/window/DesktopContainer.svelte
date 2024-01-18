@@ -1,13 +1,13 @@
 <script lang="ts">
-	import { createEventDispatcher } from 'svelte';
-	import type { Application, ApplicationState, OsKernel } from '$lib/manifest/application.manifest';
+	import {  onMount } from 'svelte';
+	import type { Application, OptionsMenu, OsKernel } from '$lib/kernel/type';
 	import { fadeIn, fadeOut } from '$lib/utils/fade';
 	import { tweened } from 'svelte/motion';
 	import { sineInOut } from 'svelte/easing';
+	import { subscribe,unsubscribe } from '$lib/kernel/application/application';
+	import { maximizeApplication } from '$lib/kernel/kernel';
 
-	export let activeApplication: ApplicationState | null = null;
-	export let applicationContext: Application;
-	export let applicationsState: Array<ApplicationState> = [];
+	export let context: Application;
 
 	const width = tweened(0, {
 		duration: 200,
@@ -18,38 +18,38 @@
 		easing: sineInOut
 	});
 	let maxYOffset: number = 100;
-
+	let positionX:number=0
+	let positionY:number=0
 	export let kernel: OsKernel;
 
 	let show: boolean = false;
 	let app: HTMLDivElement;
 
-	export function move(state: ApplicationState | null,app:HTMLDivElement) {
-		if (state === null) return;
-		if (state.context.appID !== applicationContext.appID) return;
-		if (!app) return;
-		width.set(state.width);
-		height.set(state.height);
-		if (state.size === 'min') {
-			app.style.left = `${state.x}px`;
-			app.style.top = `${state.y}px`;
-		} else {
-			app.style.left = `0px`;
-			app.style.top = `${kernel.screen.maxYOffset}px`;
+	function minimize(w:number,h:number){
+		console.log(`minimize`,`${context.appID} w:${w} h:${h}`)
+		width.set(w);
+		height.set(h);
+		show=false
+	}
+
+	function maximize(w:number,h:number,x:number,y:number){
+		width.set(w);
+		height.set(h);
+		if(app){
+			app.style.left = `${x}px`;
+			app.style.top = `${y}px`;
 		}
 	}
 
-	function detectWindow(data: Map<string, ApplicationState>) {
-		let findApp = data.has(applicationContext.appID);
-		if (findApp) {
-			let findApp = data.get(applicationContext.appID);
-			if (findApp) {
-				show = findApp.state === 'open';
-			}
-		} else {
-			show = false;
+	export function moveApplication(x:number,y:number) {
+		if(app){
+			app.style.left = `${x}px`;
+			app.style.top = `${y}px`;
 		}
+		positionX = x
+		positionY = y
 	}
+
 
 	function initApp(app: Application) {
 		width.set(app.component.width);
@@ -58,22 +58,47 @@
 
 	function initContext(kernel: OsKernel) {
 		maxYOffset = kernel.screen.maxYOffset;
+		positionY = maxYOffset
 	}
 
-	$: move(activeApplication,app);
-	$: initApp(applicationContext);
+	$: initApp(context);
 	$: initContext(kernel);
-	$: detectWindow(applicationsState);
+
+	onMount(()=>{
+		subscribe(context.appID,`container-${context.appID}`,{
+			onPositionChanged: function (x: number, y: number): void {
+				moveApplication(x, y);
+			},
+			onOpenApplication: function (): void {
+				show = true;
+			},
+			onCloseApplication: function (): void {
+				show = false;
+			},
+			onMaximize: function (width: number, height: number, x: number, y: number): void {
+				maximize(width, height, x, y);
+			},
+			onMinimize: function (width: number, height: number): void {
+				minimize(width, height);
+			},
+			onStatusbarSelected: function (menu: OptionsMenu): void {
+				maximizeApplication(context)
+			}
+		})
+		return ()=>{
+			unsubscribe(context.appID,`container-${context.appID}`)
+		}
+	})
 
 </script>
 {#if show}
 	<div
-		id={applicationContext.appID}
+		id={context.appID}
 		bind:this={app}
 		in:fadeIn
 		out:fadeOut
 		class="backdrop-blur-[500px] bg-white/40 dark:bg-gray-900 dark:bg-opacity-40 absolute shadow-2xl rounded-md"
-		style="width: {$width}px;height:{$height}px; left:10px; top:28px; z-index:1;"
+		style="width: {$width}px;height:{$height}px; left:0px; top:28px; z-index:1;"
 	>
 		<slot  width={$width} height={$height}/>
 	</div>

@@ -1,6 +1,6 @@
 import {
 	Os
-} from '$lib/manifest/application.manifest';
+} from '$lib/kernel/kernel';
 
 const kernel = Os();
 

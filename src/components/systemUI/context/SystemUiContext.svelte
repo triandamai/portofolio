@@ -1,21 +1,16 @@
 <script lang="ts">
 	import AppleLogo from '../../SVG/system/logo/AppleLogo.svelte';
 	import MenuContext from '../../framework/MenuContext.svelte';
-	import { Os, type OsKernel } from '$lib/manifest/application.manifest';
-
-	export let kernel:OsKernel
+	import { Os } from '$lib/kernel/kernel';
+	import type { OsKernel } from '$lib/kernel/type';
 
 	let menuContext: MenuContext;
+	export let kernel:OsKernel
 
 	const {changeTheme} = Os()
 
 	function updateTheme(){
-		if(kernel.isDark) {
-			document.documentElement.classList.add("dark")
-		}else {
-			document.documentElement.classList.remove("dark")
-		}
-		changeTheme(!kernel.isDark)
+		changeTheme()
 	}
 
 

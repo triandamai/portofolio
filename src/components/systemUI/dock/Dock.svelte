@@ -1,11 +1,13 @@
 <script lang="ts">
+	import type { Application, ApplicationState } from '$lib/kernel/type';
+	import { sineInOut } from 'svelte/easing';
 	import DockItem from './DockItem.svelte';
 	import { createEventDispatcher } from 'svelte';
-	import { type ApplicationState } from '$lib/manifest/application.manifest';
+	import {fly} from "svelte/transition"
 
 	const dispatcher = createEventDispatcher();
 
-	export let activeApplication: Map<string, ApplicationState> = [];
+	export let activeApplication: Map<string, ApplicationState> = new Map();
 	let mouseX: number | null = null;
 	let isDividerShow: boolean = false;
 	let isShow: boolean = true;
@@ -20,10 +22,15 @@
 		isShow = false;
 	}
 
-	function onItemClick(appID: string) {
-		dispatcher('click', {
-			appID: appID
-		});
+	function onItemClick(app: Application) {
+		dispatcher('click', app);
+	}
+
+	function onOpenLaunchpad(){
+		dispatcher('launchpad',{});
+	}
+	function onOpenFinder(){
+		dispatcher('finder',{});
 	}
 
 	function showDivider(app: Map<string, ApplicationState>) {
@@ -42,8 +49,21 @@
 </script>
 {#if isShow}
 	<div
+	in:fly={{
+		easing: sineInOut,
+		duration: 400,
+		x: 0,
+		y: 200
+	}}
+	out:fly={{
+		easing: sineInOut,
+		duration: 400,
+		x: 0,
+		y: 200
+	}}
 		class="fixed bottom-0 z-10 h-10 w-screen flex flex-row">
 		<div class="dock-container">
+			<!-- svelte-ignore a11y-no-static-element-interactions -->
 			<div
 				class="dock-el rounded-2xl backdrop-blur-md bg-white/30"
 				on:mousemove={(event)=>(mouseX = event.x)}
@@ -53,13 +73,13 @@
 					mouseX={mouseX}
 					appID="launchpad"
 					active={false}
-					on:click={()=>{onItemClick('launchpad')}}
+					on:click={onOpenLaunchpad}
 				/>
 				<DockItem
 					mouseX={mouseX}
 					appID="finder"
 					active={activeApplication.get('finder')?.state !== 'close'}
-					on:click={()=>{onItemClick('finder')}}
+					on:click={onOpenFinder}
 				/>
 				{#if isDividerShow}
 					<div class="divider bg-gray-900" aria-hidden="true" />
@@ -70,7 +90,7 @@
 							mouseX={mouseX}
 							appID={app.context.appID}
 							active={activeApplication.get(key)?.state !== 'close'}
-							on:click={()=>{onItemClick(key)}}
+							on:click={()=>{onItemClick(app.context)}}
 						/>
 					{/if}
 				{/each}

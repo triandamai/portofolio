@@ -1,41 +1,26 @@
 <script lang="ts">
 	import Cupertino from '../components/framework/Cupertino.svelte';
 	import TrafficLight from '../components/systemUI/TrafficLight.svelte';
-	import { createEventDispatcher, onMount } from 'svelte';
-	import { Os } from '$lib/manifest/application.manifest';
-
-	const dispatcher = createEventDispatcher();
-
-	const { subscribe, unsubscribe, getOs } = Os();
+	import type { Application } from '$lib/kernel/type';
+	import {minimizeApplication,maximizeApplication, closeApplication } from '$lib/kernel/kernel';
 	export let width:number
 	export let height:number
+	export let context:Application
 
-	onMount(() => {
-		subscribe('selected-menu', 'notes', (data) => {
-			console.log('on toolbar menu selected', {
-				data,
-				os: getOs()
-			});
-		});
-
-		return () => {
-			unsubscribe('selected-menu', 'finder');
-		};
-	});
 </script>
 
 <Cupertino
 	style={'basic-sidebar'}
 	appWidth={width}
 	appHeight={height}
-	on:enableMove
-	on:windowActive
+	context={context}
+	
 >
 	<TrafficLight
 		slot="appbar"
-		on:close
-		on:minimize
-		on:maximize
+		on:close={e=>closeApplication(context)}
+		on:minimize={e=>minimizeApplication(context)}
+		on:maximize={e=>maximizeApplication(context)}
 	/>
 
 	<div

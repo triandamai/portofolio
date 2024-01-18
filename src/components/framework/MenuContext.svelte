@@ -2,7 +2,7 @@
 	import { clickOutside } from '$lib/utils/clickoutside';
 	import { fadeIn, fadeOut } from '$lib/utils/fade';
 	import { createEventDispatcher, onMount } from 'svelte';
-	import { type OsKernel } from '$lib/manifest/application.manifest';
+	import type { OsKernel } from '$lib/kernel/type';
 
 	let dispatcher = createEventDispatcher();
 	let isShow: boolean = false;
@@ -56,6 +56,7 @@
 
 	$: measurePosition(positionX, positionY, element);
 </script>
+
 {#if isShow}
 	<div
 		bind:this={element}
@@ -64,9 +65,11 @@
 		in:fadeIn
 		out:fadeOut
 		use:clickOutside={{
-			callback:()=>{
-				dispatcher("clickOutside",()=>{hide()})
-				return true
+			callback: () => {
+				dispatcher('clickOutside', () => {
+					hide();
+				});
+				return true;
 			}
 		}}
 	>

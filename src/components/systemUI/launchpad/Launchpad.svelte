@@ -2,7 +2,7 @@
 	import { fadeIn, fadeOut } from '$lib/utils/fade';
 	import { clickOnNoElementId } from '$lib/utils/clickOnNoElementId';
 	import { createEventDispatcher } from 'svelte';
-	import type { OsKernel } from '$lib/manifest/application.manifest';
+	import type { OsKernel } from '$lib/kernel/type';
 
 	import ButtonBase from '../dock/ButtonBase.svelte';
 

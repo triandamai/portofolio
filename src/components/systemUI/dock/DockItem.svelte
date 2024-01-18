@@ -81,7 +81,7 @@
 
 	function req(mouseX: number | null) {
 		if (browser) {
-			raf = requestAnimationFrame(() => animate(mouseX));
+			raf = requestAnimationFrame(() => animate(mouseX ?? 0));
 		}
 	}
 

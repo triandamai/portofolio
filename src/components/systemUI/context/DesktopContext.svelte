@@ -1,7 +1,7 @@
 <script lang="ts">
 	import MenuContext from '../../framework/MenuContext.svelte';
 	import MenuContextItem from '../../framework/MenuContextItem.svelte';
-	import type { OsKernel } from '$lib/manifest/application.manifest';
+	import type { OsKernel } from '$lib/kernel/type';
 
 	export let kernel: OsKernel;
 

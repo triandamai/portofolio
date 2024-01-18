@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { createEventDispatcher, onMount } from 'svelte';
+	import {notifyApplicationActive,notifyEnableMoveApplication} from "$lib/kernel/kernel"
+	import type { Application } from '$lib/kernel/type';
 
 	export let style: 'basic' | 'basic-sidebar' = 'basic';
 	let appbar: HTMLDivElement | undefined;
@@ -11,33 +13,33 @@
 	export let appWidth:number
 	export let appHeight:number
 
+	export let context:Application
+
 	let headerHeight: number = 50;
 	let bodyHeight: number = 0;
 	let sideBarWidth:number=200;
-	let dispatcher = createEventDispatcher();
 	let idHeader = `id-header-${Math.random()}`;
 	let idAppBar = `id-appbar-${Math.random()}`;
 
-	function sendEvent(event: string) {
-		dispatcher(event, {});
-	}
+
 
 	function enableMove(event: MouseEvent) {
 		if((event.target as HTMLElement).id.startsWith("traffic-light")) return
-		sendEvent('enableMove');
+		notifyEnableMoveApplication(context)
+	
 	}
 
 	function windowActive(_: MouseEvent) {
-		sendEvent('windowActive');
+		notifyApplicationActive(context)
 	}
 
-	function measureBodyHeight(width:number,height:number){
+	function measureBodyHeight(width:number,height:number,body:HTMLElement|undefined){
 		if(height > headerHeight){
 			bodyHeight = height - headerHeight
 		}
 	}
 
-	$: measureBodyHeight(appWidth,appHeight)
+	$: measureBodyHeight(appWidth,appHeight,body)
 
 	onMount(() => {
 		appbar?.addEventListener('mousedown', enableMove);
@@ -45,7 +47,7 @@
 		body?.addEventListener('mousedown', windowActive);
 		sidebar?.addEventListener('mousedown', windowActive);
 
-		bodyHeight = (cupertino.clientHeight - headerHeight);
+		bodyHeight = (cupertino?.clientHeight ?? 0 - headerHeight);
 
 		return ()=>{
 			appbar?.removeEventListener("mousedown",enableMove)

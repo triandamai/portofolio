@@ -33,8 +33,8 @@
 	out:fadeOut
 	class="main-layout w-screen h-screen flex flex-row place-content-center backdrop-blur-sm">
 	<div class="fixed w-screen flex flex-row place-content-end px-2 py-2">
-		<Battery />
-		<Wifi />
+		<Battery  class="fill-white h-6 w-6 place-self-center mx-2"/>
+		<Wifi class="fill-white h-5 w-5 place-self-center mx-2"/>
 	</div>
 	<div class="h-screen py-10 w-1/3 flex flex-col">
 		<div class="h-2/3">
@@ -52,6 +52,8 @@
 					<h6 class="text-center text-white text-md font-bold font-sf-bold">Trian Damai</h6>
 				{/if}
 			</div>
+			<!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
+			<!-- svelte-ignore a11y-click-events-have-key-events -->
 			<h6
 				on:click={()=>{
 					showInput = true

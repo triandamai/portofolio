@@ -3,6 +3,7 @@ import { createEventDispatcher } from 'svelte';
 
 const dispatcher = createEventDispatcher()
 </script>
+<!-- svelte-ignore a11y-no-static-element-interactions -->
 <svg
 	on:click={()=>{dispatcher("click",{})}}
 	xmlns="http://www.w3.org/2000/svg"

@@ -1,7 +1,7 @@
-import type { ApplicationState } from '$lib/manifest/application.manifest';
+import type { ApplicationState } from '$lib/kernel/type';
 
-export function updateElementZ(applications: Map<string,ApplicationState>, appID: string) {
-	applications.forEach((app,key) => {
+export function updateElementZ(applications: Map<string, ApplicationState>, appID: string) {
+	applications.forEach((app, key) => {
 		const component = document.getElementById(key);
 		if (component) {
 			if (key !== appID) {
@@ -13,12 +13,14 @@ export function updateElementZ(applications: Map<string,ApplicationState>, appID
 	});
 }
 
-export function normalizePosition(app: Map<string, ApplicationState>, activeApp: ApplicationState): Map<string, ApplicationState> {
-	let data: Map<string, ApplicationState> = new Map();
+export function normalizePosition(
+	app: Map<string, ApplicationState>,
+	activeApp: ApplicationState
+): Map<string, ApplicationState> {
+	const data: Map<string, ApplicationState> = new Map();
 	const index = (idx: number, dec: boolean) => {
 		if (idx <= 0) return 0;
-		else if (dec)
-			return (idx - 1);
+		else if (dec) return idx - 1;
 		else return idx;
 	};
 
