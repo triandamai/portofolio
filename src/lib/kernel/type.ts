@@ -1,3 +1,5 @@
+import { systemToolbar } from '$lib/kernel/data';
+
 export type osEvent = 'selected-menu' | 'os-state-changed'
 export type ApplicationState = {
 	z: number,
@@ -39,12 +41,7 @@ export type Application = {
 	isDocked: boolean
 }
 export type OsKernel = {
-	user: string,
-	password: string,
-	showLaunchpad: boolean,
-	showStatusBar: boolean,
 	isDark:boolean,
-	lock: boolean,
 	observer: Map<osEvent, Map<string, (data: any) => void>>,
 	applications: Array<Application>,
 	docked_app: Array<string>,
@@ -55,12 +52,7 @@ export type OsKernel = {
 	wallpaper: string
 }
 export const kernel: OsKernel = {
-	user: 'Trian Damai',
-	password: '',
-	showLaunchpad: false,
-	showStatusBar: false,
 	isDark:false,
-	lock: false,
 	screen: {
 		maxYOffset:28,
 		width: 900,
@@ -71,51 +63,7 @@ export const kernel: OsKernel = {
 	docked_app: ['finder', 'launchpad', 'settings'],
 	toolbar: [],
 	toolbarSystem: [],
-	menuToolbarSystem: [
-		{
-			name: 'About This Mac',
-			type: 'button'
-		},
-		{
-			name: '',
-			type: 'divider'
-		},
-		{
-			name: 'System Settings',
-			type: 'button'
-		},
-		{
-			name: 'App Store',
-			type: 'button'
-		},
-		{
-			name: '',
-			type: 'divider'
-		},
-		{
-			name: 'Sleep',
-			type: 'button'
-		},
-		{
-			name: 'Restart',
-			type: 'button'
-		},
-		{
-			name: 'Shutdown',
-			type: 'button'
-		},
-		{
-			name: '',
-			type: 'divider'
-		},
-		{
-			name: 'LockScreen',
-			type: 'button'
-		},
-		{
-			name: 'Log Out',
-			type: 'button'
-		}],
+	menuToolbarSystem: systemToolbar,
 	wallpaper: ''
 };
 
