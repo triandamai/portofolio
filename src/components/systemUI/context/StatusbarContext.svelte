@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { OptionsMenu,OsKernel} from '$lib/kernel/type';
+	import {openApplication} from '$lib/kernel/kernel';
 	import { goto } from '$app/navigation';
 	import MenuContext from '../../framework/MenuContext.svelte';
 	import MenuContextItem from '../../framework/MenuContextItem.svelte';
@@ -29,6 +30,11 @@
 					menuContext.hide()
 					if(context.name === 'LockScreen' || context.name === 'Log Out'){
 						goto("/lock")
+					}else if(context.name === 'About This Mac'){
+						const findAboutApp = kernel.applications.find(e=>e.appID === "about")
+						if(findAboutApp){
+							openApplication(findAboutApp)
+						}
 					}else {
 						notifySelectedStatusBar($currentApplication?.context.appID ?? '',context)
 					}

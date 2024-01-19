@@ -10,7 +10,6 @@
 	import ActionToggle from '../../SVG/system/action/ActionToggle.svelte';
 	import AppleLogo from '../../SVG/system/logo/AppleLogo.svelte';
 	import type { OptionsMenu } from '$lib/kernel/type';
-	import { tweened } from 'svelte/motion';
 	import { sineInOut } from 'svelte/easing';
 	import { currentApplication } from '$lib/kernel/application/application';
 

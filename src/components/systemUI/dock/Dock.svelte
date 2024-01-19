@@ -38,7 +38,7 @@
 			isDividerShow = false;
 			return;
 		}
-		if (app.size == 1 && app.has('finder')) {
+		if (app.size == 1 && (app.has('finder') || app.has('about'))) {
 			isDividerShow = false;
 			return;
 		}
@@ -85,7 +85,7 @@
 					<div class="divider bg-gray-900" aria-hidden="true" />
 				{/if}
 				{#each [...activeApplication] as [key, app]}
-					{#if key !== 'finder'}
+					{#if key !== 'finder' && key !== 'about'}
 						<DockItem
 							mouseX={mouseX}
 							appID={app.context.appID}
