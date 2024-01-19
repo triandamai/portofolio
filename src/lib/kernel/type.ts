@@ -12,7 +12,7 @@ export type ApplicationListener = {
 	onMinimize: (width: number, height: number) => void;
 	onPositionChanged: (x: number, y: number) => void;
 	onStatusbarSelected: (menu: OptionsMenu) => void;
-	onOpenApplication: () => void;
+	onOpenApplication: (x:number,y:number) => void;
 	onCloseApplication: () => void;
 };
 export type DataEvent = {
@@ -47,6 +47,7 @@ export type Frame = {
 	width: number;
 	height: number;
 	useDefaultPlatform: boolean;
+	fixedSize:boolean
 };
 export type Application = {
 	name: string;

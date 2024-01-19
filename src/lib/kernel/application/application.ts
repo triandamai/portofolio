@@ -1,7 +1,7 @@
 import { writable } from 'svelte/store';
 import type { ApplicationState, ApplicationListener, OptionsMenu } from '../type';
 
-export const applicationObserver: Map<string, Map<string, ApplicationListener>> = new Map();
+const applicationObserver: Map<string, Map<string, ApplicationListener>> = new Map();
 export const currentApplication = writable<ApplicationState | null>(null);
 export const activeApplication = writable<Map<string, ApplicationState>>(new Map());
 
@@ -21,8 +21,8 @@ export function notifyAppMinimize(target: string, width: number, height: number)
 export function notifyAppClose(target: string) {
 	applicationObserver.get(target)?.forEach((e) => e.onCloseApplication());
 }
-export function notifyAppOpen(target: string) {
-	applicationObserver.get(target)?.forEach((e) => e.onOpenApplication());
+export function notifyAppOpen(target: string, x: number, y: number) {
+	applicationObserver.get(target)?.forEach((e) => e.onOpenApplication(x, y));
 }
 
 export function notifyPositionChanged(target: string, x: number, y: number) {
@@ -32,18 +32,46 @@ export function changeCurrentApplication(application: ApplicationState | null) {
 	currentApplication.update(() => application);
 }
 
+export function invalidateActiveApp(data: Map<string, ApplicationState>) {
+	activeApplication.set(data);
+}
+
 export function openApplication(target: ApplicationState) {
-	activeApplication.update((active) => active.set(target.context.appID, target));
+	activeApplication.update((value) => {
+		value.set(target.context.appID, target);
+		return value;
+	});
 }
 export function closeApplication(target: string) {
-	activeApplication.update((active) => {
-		active.delete(target);
-		return active;
+	activeApplication.update((e) => {
+		e.delete(target);
+		return e;
 	});
 }
 export function updateActiveApplication(app: ApplicationState) {
-	activeApplication.update((active) => active.set(app.context.appID, app));
+	activeApplication.update((e) => {
+		e.set(app.context.appID, app);
+		return e;
+	});
 }
+
+export function registerReceiver(target: string, cb: ApplicationListener) {
+	if (applicationObserver.has(target)) {
+		applicationObserver.get(target)?.set(target, cb);
+		return;
+	}
+	const map = new Map();
+	map.set(target, cb);
+	applicationObserver.set(target, map);
+	return;
+}
+
+export function unregisterReceiver(target: string) {
+	if (applicationObserver.has(target)) {
+		applicationObserver.get(target)?.delete(target);
+	}
+}
+
 export function subscribe(target: string, sub: string, cb: ApplicationListener) {
 	if (applicationObserver.has(target)) {
 		applicationObserver.get(target)?.set(sub, cb);

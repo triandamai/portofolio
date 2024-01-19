@@ -22,7 +22,9 @@
 		currentApplication,
 		updateActiveApplication,
 		closeApplication,
-		activeApplication
+		activeApplication,
+		invalidateActiveApp,
+		openApplication
 	} from '$lib/kernel/application/application';
 
 	const { createWindowConfig } = Os();
@@ -65,13 +67,12 @@
 		if ($currentApplication == null) return;
 		let oldActive = $currentApplication;
 		if ($currentApplication.size === 'min') {
-			statusBar.hide();
-			dock.hide();
 			notifyAppMaximize(app.appID, screen.width, screen.height, 0, 0);
 			oldActive.size = 'max';
+			currentApplication.set(oldActive);
+			statusBar.hide();
+			dock.hide();
 		} else {
-			statusBar.show();
-			dock.show();
 			if (oldActive.y < maxYOffset) {
 				oldActive.y = maxYOffset;
 			}
@@ -83,8 +84,10 @@
 				oldActive.y
 			);
 			oldActive.size = 'min';
+			currentApplication.set(oldActive);
+			statusBar.show();
+			dock.show();
 		}
-		currentApplication.set(oldActive);
 	}
 
 	function openFinder() {
@@ -113,31 +116,36 @@
 	}
 
 	function openApp(data: Application) {
+		statusBar.show();
 		launchpad.hide();
 		//update or insert to list active app
-		const listActiveApplication = $activeApplication;
-		if (listActiveApplication.has(data.appID)) {
+		if ($activeApplication.has(data.appID)) {
 			//open
-			let findApp = listActiveApplication.get(data.appID);
+			let findApp = $activeApplication.get(data.appID);
 			if (findApp) {
 				findApp.state = 'open';
-				findApp.z = listActiveApplication.size + 1;
+				findApp.z = $activeApplication.size;
 				findApp.x = x;
 				findApp.y = y;
 
 				currentApplication.set(findApp);
-				notifyAppOpen($currentApplication?.context.appID ?? '');
-				activeApplication.set(normalizePosition($activeApplication, findApp));
-				updateElementZ($activeApplication, data.appID);
+				openApplication(findApp);
+				notifyAppOpen($currentApplication?.context.appID ?? '', x, y);
+
+				invalidateActiveApp(normalizePosition($activeApplication, findApp));
 			}
 		} else {
 			//insert from applications to active
 			let findAppFromList = kernel.applications.find((app) => app.appID === data.appID);
 			if (findAppFromList) {
 				const index = () => {
-					if (listActiveApplication.size < 0) return 1;
-					else return listActiveApplication.size;
+					if ($activeApplication.size < 0) return 1;
+					else return $activeApplication.size;
 				};
+				const posX = (kernel.screen.width / 2 + findAppFromList.component.width / 2) / 2;
+				const posY =
+					((kernel.screen.height - maxYOffset) / 2 + findAppFromList.component.height / 2) / 3;
+
 				const newData: ApplicationState = {
 					state: 'open',
 					context: findAppFromList,
@@ -145,14 +153,14 @@
 					size: 'min',
 					width: findAppFromList.component.width,
 					height: findAppFromList.component.height,
-					y: maxYOffset,
-					x: 0
+					y: posY,
+					x: posX
 				};
-				$activeApplication.set(findAppFromList.appID, newData);
 				currentApplication.set(newData);
-				notifyAppOpen($currentApplication?.context.appID ?? '');
-				activeApplication.set(normalizePosition(listActiveApplication, newData));
-				updateElementZ($activeApplication, data.appID);
+				notifyAppOpen($currentApplication?.context.appID ?? '', posX, posY);
+				openApplication(newData);
+
+				invalidateActiveApp(normalizePosition($activeApplication, newData));
 			}
 		}
 	}
@@ -218,6 +226,9 @@
 		if (browser) {
 			screenHeight = window.innerHeight;
 		}
+		activeApplication.subscribe((data) => {
+			updateElementZ(data, $currentApplication?.context.appID ?? '');
+		});
 
 		registerEvent({
 			onEnableMoveApp: function (target: Application): void {
@@ -252,6 +263,7 @@
 <svelte:window
 	on:resize={(e) => (screenHeight = window.innerHeight)}
 	on:mousemove={(e) => {
+		//show or hide status bar and dock
 		if ($currentApplication?.size === 'max') {
 			if (!statusBar.getStatusbarInfo().isShow) {
 				if (e.y < 10) {
@@ -290,9 +302,7 @@
 			statusBar.show();
 			detail();
 		}}
-		on:click={({ detail }) => {
-			openApp(detail);
-		}}
+		on:click={({ detail }) => openApp(detail)}
 	/>
 	<Statusbar
 		bind:this={statusBar}

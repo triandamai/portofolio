@@ -17,6 +17,7 @@ export function normalizePosition(
 	app: Map<string, ApplicationState>,
 	activeApp: ApplicationState
 ): Map<string, ApplicationState> {
+	if (app.size < 1) return app;
 	const data: Map<string, ApplicationState> = new Map();
 	const index = (idx: number, dec: boolean) => {
 		if (idx <= 0) return 0;

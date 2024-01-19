@@ -1,20 +1,21 @@
-import {
-	Os
-} from '$lib/kernel/kernel';
+import { Os } from '$lib/kernel/kernel';
 
-const kernel = Os();
+const {
+	createAppConfig,
+	createSystemToolbar,
+	createOptionsMenu,
+	createToolbar,
+	createFrameConfig
+} = Os();
 
-kernel.createSystemToolbar(
+createSystemToolbar(
 	{
 		name: 'File',
-		contextMenu: kernel.createOptionsMenu(
-			['New', 'Open...', 'Save as', 'Recent'],
-			['Remote Developments']
-		)
+		contextMenu: createOptionsMenu(['New', 'Open...', 'Save as', 'Recent'], ['Remote Developments'])
 	},
 	{
 		name: 'Edit',
-		contextMenu: kernel.createOptionsMenu(
+		contextMenu: createOptionsMenu(
 			['Undo', 'Redo'],
 			['Cut', 'Copy', 'Paste', 'Copy Path/Reference', 'Delete'],
 			['Find', 'Find Usages']
@@ -22,69 +23,81 @@ kernel.createSystemToolbar(
 	},
 	{
 		name: 'Selection',
-		contextMenu: kernel.createOptionsMenu(
-			['Always Show Bookmar Bar', 'Always Hide Toolbar']
-		)
+		contextMenu: createOptionsMenu(['Always Show Bookmar Bar', 'Always Hide Toolbar'])
 	},
 	{
 		name: 'View',
-		contextMenu: kernel.createOptionsMenu(
-			['Always Show Bookmar Bar', 'Always Hide Toolbar']
-		)
+		contextMenu: createOptionsMenu(['Always Show Bookmar Bar', 'Always Hide Toolbar'])
 	},
 	{
 		name: 'Terminal',
-		contextMenu: kernel.createOptionsMenu(
+		contextMenu: createOptionsMenu(
 			['New Terminal', 'Split Terminal'],
 			['Run Task...', 'Built Task...', 'Active Task']
 		)
-	});
-
-kernel.createAppConfig(
-	{
-		appName: 'Finder',
-		appID: 'finder',
-		author: 'Trian Damai',
-		component: kernel.createFrameConfig({
-			componentName: 'Finder',
-			width: 600,
-			height: 400,
-			useDefaultPlatform: true
-		}),
-		openWhenStarting: false,
-		toolbar: kernel.createToolbar({
-				name: 'Finder',
-				contextMenu: kernel.createOptionsMenu(
-					['About Finder'], ['Settings...'], ['Hide Finder', 'Close Finder']
-				)
-			},
-			{
-				name: 'Edit',
-				contextMenu: kernel.createOptionsMenu(
-					['New Folder'], ['Trash'], ['Hide File']
-				)
-			})
 	}
 );
 
-kernel.createAppConfig(
-	{
-		appName: 'Notes',
-		appID: 'notes',
-		author: 'Trian Damai',
-		component: kernel.createFrameConfig({
-			componentName: 'Notes',
-			width: 600,
-			height: 400,
-			useDefaultPlatform: true
-		}),
-		openWhenStarting: false,
-		toolbar: kernel.createToolbar({
-				name: 'Notes',
-				contextMenu: kernel.createOptionsMenu(
-					['About Notes'], ['Settings...'], ['Hide Note', 'Close Note']
-				)
-			}
-		)
-	}
-);
+createAppConfig({
+	appName: 'Finder',
+	appID: 'finder',
+	author: 'Trian Damai',
+	component: createFrameConfig({
+		componentName: 'Finder',
+		width: 600,
+		height: 400,
+		useDefaultPlatform: true,
+		fixedSize: false
+	}),
+	openWhenStarting: false,
+	toolbar: createToolbar(
+		{
+			name: 'Finder',
+			contextMenu: createOptionsMenu(
+				['About Finder'],
+				['Settings...'],
+				['Hide Finder', 'Close Finder']
+			)
+		},
+		{
+			name: 'Edit',
+			contextMenu: createOptionsMenu(['New Folder'], ['Trash'], ['Hide File'])
+		}
+	)
+});
+
+createAppConfig({
+	appName: 'Notes',
+	appID: 'notes',
+	author: 'Trian Damai',
+	component: createFrameConfig({
+		componentName: 'Notes',
+		width: 600,
+		height: 400,
+		useDefaultPlatform: true,
+		fixedSize: false
+	}),
+	openWhenStarting: false,
+	toolbar: createToolbar({
+		name: 'Notes',
+		contextMenu: createOptionsMenu(['About Notes'], ['Settings...'], ['Hide Note', 'Close Note'])
+	})
+});
+
+createAppConfig({
+	appName: 'Calculator',
+	appID: 'calculator',
+	author: 'Trian Damai',
+	component: createFrameConfig({
+		componentName: 'Calculator',
+		width: 300,
+		height: 400,
+		useDefaultPlatform: true,
+		fixedSize: false
+	}),
+	openWhenStarting: false,
+	toolbar: createToolbar({
+		name: 'Calculator',
+		contextMenu: createOptionsMenu(['About Notes'], ['Settings...'], ['Hide Note', 'Close Note'])
+	})
+});

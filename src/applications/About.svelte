@@ -1,17 +1,19 @@
 <script lang="ts">
+	import type { Application } from '$lib/kernel/type';
 	import Cupertino from '../components/framework/Cupertino.svelte';
 	import TrafficLight from '../components/systemUI/TrafficLight.svelte';
-	import { createEventDispatcher } from 'svelte';
 
-	const dispatcher = createEventDispatcher();
 	export let width:number
 	export let height:number
+	export let context:Application
+
 
 </script>
 
 <Cupertino
 	appWidth={width}
 	appHeight={height}
+	context={context}
 	on:enableMove
 	on:windowActive
 >
@@ -21,5 +23,7 @@
 		on:minimize
 		on:maximize
 	/>
-	<p>About app</p>
+	<div class="flex flex-col">
+
+	</div>
 </Cupertino>

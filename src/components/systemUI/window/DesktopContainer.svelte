@@ -4,7 +4,7 @@
 	import { fadeIn, fadeOut } from '$lib/utils/fade';
 	import { tweened } from 'svelte/motion';
 	import { sineInOut } from 'svelte/easing';
-	import { subscribe,unsubscribe } from '$lib/kernel/application/application';
+	import { subscribe,unsubscribe,activeApplication } from '$lib/kernel/application/application';
 	import { maximizeApplication } from '$lib/kernel/kernel';
 
 	export let context: Application;
@@ -17,9 +17,10 @@
 		duration: 200,
 		easing: sineInOut
 	});
-	let maxYOffset: number = 100;
+	let maxYOffset: number = 28;
 	let positionX:number=0
-	let positionY:number=0
+	let positionY:number=28
+	let zIndex:number =0
 	export let kernel: OsKernel;
 
 	let show: boolean = false;
@@ -35,17 +36,11 @@
 	function maximize(w:number,h:number,x:number,y:number){
 		width.set(w);
 		height.set(h);
-		if(app){
-			app.style.left = `${x}px`;
-			app.style.top = `${y}px`;
-		}
+		positionX = x
+		positionY = y
 	}
 
 	export function moveApplication(x:number,y:number) {
-		if(app){
-			app.style.left = `${x}px`;
-			app.style.top = `${y}px`;
-		}
 		positionX = x
 		positionY = y
 	}
@@ -69,8 +64,10 @@
 			onPositionChanged: function (x: number, y: number): void {
 				moveApplication(x, y);
 			},
-			onOpenApplication: function (): void {
+			onOpenApplication: function (x:number,y:number): void {
 				show = true;
+				zIndex = $activeApplication.size + 1
+				moveApplication(x,y)
 			},
 			onCloseApplication: function (): void {
 				show = false;
@@ -98,7 +95,7 @@
 		in:fadeIn
 		out:fadeOut
 		class="backdrop-blur-[500px] bg-white/40 dark:bg-gray-900 dark:bg-opacity-40 absolute shadow-2xl rounded-md"
-		style="width: {$width}px;height:{$height}px; left:0px; top:28px; z-index:1;"
+		style="width: {$width}px;height:{$height}px; left:{positionX}px; top:{positionY}px; z-index:{zIndex};"
 	>
 		<slot  width={$width} height={$height}/>
 	</div>
