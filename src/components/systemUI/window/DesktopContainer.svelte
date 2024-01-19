@@ -1,13 +1,14 @@
 <script lang="ts">
 	import {  onMount } from 'svelte';
-	import type { Application, OptionsMenu, OsKernel } from '$lib/kernel/type';
+	import type { Application, OptionsMenu, OsKernel } from '$lib/core/type';
 	import { fadeIn, fadeOut } from '$lib/utils/fade';
 	import { tweened } from 'svelte/motion';
 	import { sineInOut } from 'svelte/easing';
-	import { subscribe,unsubscribe,activeApplication } from '$lib/kernel/application/application';
-	import { maximizeApplication } from '$lib/kernel/kernel';
+	import { subscribe,unsubscribe,activeApplication } from '$lib/core/application';
+	import { maximizeApplication } from '$lib/core/system/macos';
 
 	export let context: Application;
+	export let macos: OsKernel;
 
 	const width = tweened(0, {
 		duration: 200,
@@ -21,7 +22,6 @@
 	let positionX:number=0
 	let positionY:number=28
 	let zIndex:number =0
-	export let kernel: OsKernel;
 
 	let show: boolean = false;
 	let app: HTMLDivElement;
@@ -57,7 +57,7 @@
 	}
 
 	$: initApp(context);
-	$: initContext(kernel);
+	$: initContext(macos);
 
 	onMount(()=>{
 		subscribe(context.appID,`container-${context.appID}`,{

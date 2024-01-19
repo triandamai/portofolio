@@ -1,4 +1,4 @@
-import type { ApplicationState } from '$lib/kernel/type';
+import type { ApplicationState } from '$lib/core/type';
 
 export function updateElementZ(applications: Map<string, ApplicationState>, appID: string) {
 	applications.forEach((app, key) => {

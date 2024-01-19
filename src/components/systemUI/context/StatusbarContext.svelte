@@ -1,14 +1,17 @@
 <script lang="ts">
-	import type { OptionsMenu,OsKernel} from '$lib/kernel/type';
-	import {openApplication} from '$lib/kernel/kernel';
+	import type { OptionsMenu,OsKernel} from '$lib/core/type';
+	import {openApplication} from '$lib/core/system/macos';
 	import { goto } from '$app/navigation';
+	import { currentApplication, notifySelectedStatusBar } from '$lib/core/application';
+	
 	import MenuContext from '../../framework/MenuContext.svelte';
 	import MenuContextItem from '../../framework/MenuContextItem.svelte';
-	import { currentApplication, notifySelectedStatusBar } from '$lib/kernel/application/application';
 
 	export let menuContextData:Array<OptionsMenu> = []
-	export let kernel:OsKernel
+	export let macos:OsKernel
+
 	let menuContext:MenuContext
+
 	export function show(x:number,y:number,data:Array<OptionsMenu>){
 		menuContext.show(x,y)
 		menuContextData = data
@@ -19,7 +22,7 @@
 </script>
 <MenuContext
 	bind:this={menuContext}
-	kernel={kernel}
+	macos={macos}
 	on:clickOutside={({detail})=>{detail()}}
 >
 	{#each menuContextData as context }
@@ -31,7 +34,7 @@
 					if(context.name === 'LockScreen' || context.name === 'Log Out'){
 						goto("/lock")
 					}else if(context.name === 'About This Mac'){
-						const findAboutApp = kernel.applications.find(e=>e.appID === "about")
+						const findAboutApp = macos.applications.find(e=>e.appID === "about")
 						if(findAboutApp){
 							openApplication(findAboutApp)
 						}

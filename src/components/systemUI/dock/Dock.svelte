@@ -1,9 +1,10 @@
 <script lang="ts">
-	import type { Application, ApplicationState } from '$lib/kernel/type';
+	import type { Application, ApplicationState } from '$lib/core/type';
 	import { sineInOut } from 'svelte/easing';
-	import DockItem from './DockItem.svelte';
 	import { createEventDispatcher } from 'svelte';
 	import {fly} from "svelte/transition"
+
+	import DockItem from './DockItem.svelte';
 
 	const dispatcher = createEventDispatcher();
 

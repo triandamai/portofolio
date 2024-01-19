@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { createEventDispatcher, onMount } from 'svelte';
-	import {notifyApplicationActive,notifyEnableMoveApplication} from "$lib/kernel/kernel"
-	import type { Application } from '$lib/kernel/type';
+	import { onMount } from 'svelte';
+	import {notifyApplicationActive,notifyEnableMoveApplication} from "$lib/core/system/macos"
+	import type { Application } from '$lib/core/type';
 
 	export let style: 'basic' | 'basic-sidebar' = 'basic';
 	let appbar: HTMLDivElement | undefined;

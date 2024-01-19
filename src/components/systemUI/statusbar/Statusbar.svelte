@@ -1,6 +1,9 @@
 <script lang="ts">
-	import type { ApplicationState, OsKernel } from '$lib/kernel/type';
+	import type { ApplicationState, OsKernel } from '$lib/core/type';
 	import { createEventDispatcher, onMount } from 'svelte';
+	import type { OptionsMenu } from '$lib/core/type';
+	import { sineInOut } from 'svelte/easing';
+	import { currentApplication } from '$lib/core/application';
 	import { fly } from 'svelte/transition';
 
 	import StatusbarTime from './StatusbarTime.svelte';
@@ -9,15 +12,12 @@
 	import Battery from '../../SVG/system/battery/Battery.svelte';
 	import ActionToggle from '../../SVG/system/action/ActionToggle.svelte';
 	import AppleLogo from '../../SVG/system/logo/AppleLogo.svelte';
-	import type { OptionsMenu } from '$lib/kernel/type';
-	import { sineInOut } from 'svelte/easing';
-	import { currentApplication } from '$lib/kernel/application/application';
 
 	const dispatcher = createEventDispatcher();
 	let statusbar: HTMLDivElement;
 	let isShow: boolean = true;
 
-	export let kernel: OsKernel;
+	export let macos: OsKernel;
 	export let applicationContext: ApplicationState | null;
 
 	export function show() {
@@ -54,7 +54,7 @@
 		dispatcher('showMenuContext', {
 			x: 5,
 			y: statusbar.offsetTop + statusbar.clientHeight,
-			contextMenu: kernel.menuToolbarSystem
+			contextMenu: macos.menuToolbarSystem
 		});
 	}
 	onMount(() => {
@@ -85,7 +85,7 @@
 					on:click={showSystemContextMenu}
 					class="h-5 mx-2 place-self-center {$currentApplication?.size === 'max' ?'fill-white' : 'fill-gray-900 dark:fill-white'}"
 				/>
-				{#each applicationContext?.context?.tools ?? kernel.toolbarSystem as tool}
+				{#each applicationContext?.context?.tools ?? macos.toolbarSystem as tool}
 					{#if tool.name === applicationContext?.context?.name}
 						<button
 							on:click={(e) => showContextMenu(e, tool.contextMenu)}
@@ -115,8 +115,7 @@
 				<ActionToggle
 					class="place-self-center h-4 px-2 {$currentApplication?.size === 'max' ?'fill-white' : 'fill-gray-900 dark:fill-white'}"
 					on:click={({ detail }) => {
-						console.log(detail)
-						dispatcher('systemui', detail);
+						dispatcher('systemui', detail.clientX);
 					}}
 				/>
 				<Siri />

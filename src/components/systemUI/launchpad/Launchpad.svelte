@@ -2,14 +2,14 @@
 	import { fadeIn, fadeOut } from '$lib/utils/fade';
 	import { clickOnNoElementId } from '$lib/utils/clickOnNoElementId';
 	import { createEventDispatcher } from 'svelte';
-	import type { OsKernel } from '$lib/kernel/type';
+	import type { OsKernel } from '$lib/core/type';
 
 	import ButtonBase from '../dock/ButtonBase.svelte';
 
 	const dispatcher = createEventDispatcher();
 	let isShow: boolean = false;
 
-	export let kernel: OsKernel;
+	export let macos: OsKernel;
 
 	export function show() {
 		if (!isShow) {
@@ -73,7 +73,7 @@
 					class="flex flex-row flex-wrap place-content-start overflow-y-hidden"
 					style="height: 80vh; width: 70%;"
 				>
-					{#each kernel.applications as app}
+					{#each macos.applications as app}
 						{#if app.appID !== 'about'}
 							<ButtonBase
 								id={app.appID}

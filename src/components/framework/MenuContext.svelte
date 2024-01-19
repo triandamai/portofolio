@@ -2,7 +2,7 @@
 	import { clickOutside } from '$lib/utils/clickoutside';
 	import { fadeIn, fadeOut } from '$lib/utils/fade';
 	import { createEventDispatcher, onMount } from 'svelte';
-	import type { OsKernel } from '$lib/kernel/type';
+	import type { OsKernel } from '$lib/core/type';
 
 	let dispatcher = createEventDispatcher();
 	let isShow: boolean = false;
@@ -10,7 +10,7 @@
 	let positionY: number = 100;
 	export let rounded: string = 'rounded-md';
 
-	export let kernel: OsKernel;
+	export let macos: OsKernel;
 
 	let element: HTMLDivElement;
 
@@ -34,11 +34,11 @@
 	function measurePosition(x: number, y: number, el: HTMLDivElement) {
 		//calculate left position
 		if (!el) return;
-		const screenW = kernel.screen.width;
+		const screenW = macos.screen.width;
 		const elementW = el.clientWidth;
 		const rightSideElement = x + elementW;
 		if (rightSideElement >= screenW) {
-			if (positionY > kernel.screen.maxYOffset) {
+			if (positionY > macos.screen.maxYOffset) {
 				//menu context
 				positionX = normalize(rightSideElement, elementW, screenW);
 			} else {

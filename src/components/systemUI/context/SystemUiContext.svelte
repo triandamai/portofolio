@@ -1,13 +1,14 @@
 <script lang="ts">
+	import { MacOs } from '$lib/core/system/macos';
+	import type { OsKernel } from '$lib/core/type';
+
 	import AppleLogo from '../../SVG/system/logo/AppleLogo.svelte';
 	import MenuContext from '../../framework/MenuContext.svelte';
-	import { Os } from '$lib/kernel/kernel';
-	import type { OsKernel } from '$lib/kernel/type';
 
 	let menuContext: MenuContext;
-	export let kernel:OsKernel
+	export let macos:OsKernel
 
-	const {changeTheme} = Os()
+	const {changeTheme} = MacOs()
 
 	function updateTheme(){
 		changeTheme()
@@ -25,7 +26,7 @@
 </script>
 <MenuContext
 	bind:this={menuContext}
-	kernel={kernel}
+	macos={macos}
 	rounded="rounded-2xl"
 	on:clickOutside={({detail})=>{
 		detail()

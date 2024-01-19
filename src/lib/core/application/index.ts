@@ -1,5 +1,5 @@
 import { writable } from 'svelte/store';
-import type { ApplicationState, ApplicationListener, OptionsMenu } from '../type';
+import type { ApplicationState, ApplicationListener, OptionsMenu, Application } from '../type';
 
 const applicationObserver: Map<string, Map<string, ApplicationListener>> = new Map();
 export const currentApplication = writable<ApplicationState | null>(null);
@@ -13,6 +13,12 @@ export function notifyAppMaximize(
 	y: number = 0
 ) {
 	applicationObserver.get(target)?.forEach((e) => e.onMaximize(width, height, x, y));
+}
+
+export async function loadApplication(target: Application) {
+	return await import(
+		`../../../applications/${target.appID}/${target.component.componentName}.svelte`
+	);
 }
 
 export function notifyAppMinimize(target: string, width: number, height: number) {

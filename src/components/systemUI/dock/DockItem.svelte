@@ -2,10 +2,11 @@
 	import { interpolate } from 'popmotion';
 	import { spring, tweened } from 'svelte/motion';
 	import { tooltip } from '$lib/utils/tooltip';
-	import ButtonBase from './ButtonBase.svelte';
 	import { browser } from '$app/environment';
-	import { createEventDispatcher, onMount } from 'svelte';
+	import { createEventDispatcher } from 'svelte';
 	import { sineInOut } from 'svelte/easing';
+
+	import ButtonBase from './ButtonBase.svelte';
 
 	/** Block 1 */
 

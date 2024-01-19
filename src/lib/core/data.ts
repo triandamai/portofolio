@@ -1,4 +1,4 @@
-import type { OptionsMenu } from '$lib/kernel/type';
+import type { OptionsMenu } from '$lib/core/type';
 
 export const systemToolbar:Array<OptionsMenu> = [
 	{

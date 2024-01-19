@@ -1,12 +1,6 @@
-import { Os } from '$lib/kernel/kernel';
+import { MacOs } from '$lib/core/system/macos';
 
-const {
-	createAppConfig,
-	createSystemToolbar,
-	createOptionsMenu,
-	createToolbar,
-	createFrameConfig
-} = Os();
+const { createSystemToolbar, createOptionsMenu } = MacOs();
 
 createSystemToolbar(
 	{
@@ -37,85 +31,3 @@ createSystemToolbar(
 		)
 	}
 );
-
-createAppConfig({
-	appName: 'Finder',
-	appID: 'finder',
-	author: 'Trian Damai',
-	component: createFrameConfig({
-		componentName: 'Finder',
-		width: 600,
-		height: 400,
-		useDefaultPlatform: true,
-		fixedSize: false
-	}),
-	openWhenStarting: false,
-	toolbar: createToolbar(
-		{
-			name: 'Finder',
-			contextMenu: createOptionsMenu(
-				['About Finder'],
-				['Settings...'],
-				['Hide Finder', 'Close Finder']
-			)
-		},
-		{
-			name: 'Edit',
-			contextMenu: createOptionsMenu(['New Folder'], ['Trash'], ['Hide File'])
-		}
-	)
-});
-
-createAppConfig({
-	appName: 'Notes',
-	appID: 'notes',
-	author: 'Trian Damai',
-	component: createFrameConfig({
-		componentName: 'Notes',
-		width: 600,
-		height: 400,
-		useDefaultPlatform: true,
-		fixedSize: false
-	}),
-	openWhenStarting: false,
-	toolbar: createToolbar({
-		name: 'Notes',
-		contextMenu: createOptionsMenu(['About Notes'], ['Settings...'], ['Hide Note', 'Close Note'])
-	})
-});
-
-createAppConfig({
-	appName: 'Calculator',
-	appID: 'calculator',
-	author: 'Trian Damai',
-	component: createFrameConfig({
-		componentName: 'Calculator',
-		width: 300,
-		height: 400,
-		useDefaultPlatform: true,
-		fixedSize: false
-	}),
-	openWhenStarting: false,
-	toolbar: createToolbar({
-		name: 'Calculator',
-		contextMenu: createOptionsMenu(['About Notes'], ['Settings...'], ['Hide Note', 'Close Note'])
-	})
-});
-
-createAppConfig({
-	appName: 'About',
-	appID: 'about',
-	author: 'Trian Damai',
-	component: createFrameConfig({
-		componentName: 'About',
-		width: 300,
-		height: 400,
-		useDefaultPlatform: true,
-		fixedSize: false
-	}),
-	openWhenStarting: false,
-	toolbar: createToolbar({
-		name: 'About',
-		contextMenu: createOptionsMenu(['About Notes'], ['Settings...'], ['Hide Note', 'Close Note'])
-	})
-});

@@ -2,17 +2,8 @@
 	import { onMount } from 'svelte';
 	import { browser } from '$app/environment';
 	import { fadeOut, fadeIn } from '$lib/utils/fade';
-	import type { Application, ApplicationState } from '$lib/kernel/type';
-	import { Os, kernel, registerEvent, unregisterEvent } from '$lib/kernel/kernel';
-
-	import Dock from '../../components/systemUI/dock/Dock.svelte';
-	import DesktopMenuContext from '../../components/systemUI/context/DesktopContext.svelte';
-	import Statusbar from '../../components/systemUI/statusbar/Statusbar.svelte';
-	import DesktopContainer from '../../components/systemUI/window/DesktopContainer.svelte';
-	import Launchpad from '../../components/systemUI/launchpad/Launchpad.svelte';
-	import { normalizePosition, updateElementZ } from '../../components/systemUI/window/window';
-	import StatusbarContext from '../../components/systemUI/context/StatusbarContext.svelte';
-	import SystemUiContext from '../../components/systemUI/context/SystemUiContext.svelte';
+	import type { Application, ApplicationState } from '$lib/core/type';
+	import { MacOs, macos, registerEvent, unregisterEvent } from '$lib/core/system/macos';
 	import {
 		notifyPositionChanged,
 		notifyAppClose,
@@ -24,10 +15,20 @@
 		closeApplication,
 		activeApplication,
 		invalidateActiveApp,
-		openApplication
-	} from '$lib/kernel/application/application';
+		openApplication,
+		loadApplication
+	} from '$lib/core/application';
 
-	const { createWindowConfig } = Os();
+	import Dock from '../../components/systemUI/dock/Dock.svelte';
+	import DesktopMenuContext from '../../components/systemUI/context/DesktopContext.svelte';
+	import Statusbar from '../../components/systemUI/statusbar/Statusbar.svelte';
+	import DesktopContainer from '../../components/systemUI/window/DesktopContainer.svelte';
+	import Launchpad from '../../components/systemUI/launchpad/Launchpad.svelte';
+	import { normalizePosition, updateElementZ } from '../../components/systemUI/window/window';
+	import StatusbarContext from '../../components/systemUI/context/StatusbarContext.svelte';
+	import SystemUiContext from '../../components/systemUI/context/SystemUiContext.svelte';
+
+	const { createWindowConfig } = MacOs();
 
 	let statusBar: Statusbar;
 	let statusBarMenuContext: StatusbarContext;
@@ -42,10 +43,6 @@
 	let oldY: number = 0;
 	let y: number = 300;
 	let x: number = 100;
-
-	async function loadComponent(componentName: string) {
-		return await import(`../../applications/${componentName}.svelte`);
-	}
 
 	function onMinimizeApp(detail: Application) {
 		if (!$currentApplication) return;
@@ -91,7 +88,7 @@
 	}
 
 	function openFinder() {
-		const app = kernel.applications.find((app) => app.appID === 'finder');
+		const app = macos.applications.find((app) => app.appID === 'finder');
 		if (app) {
 			openApp(app);
 		}
@@ -136,15 +133,15 @@
 			}
 		} else {
 			//insert from applications to active
-			let findAppFromList = kernel.applications.find((app) => app.appID === data.appID);
+			let findAppFromList = macos.applications.find((app) => app.appID === data.appID);
 			if (findAppFromList) {
 				const index = () => {
 					if ($activeApplication.size < 0) return 1;
 					else return $activeApplication.size;
 				};
-				const posX = (kernel.screen.width / 2 + findAppFromList.component.width / 2) / 2;
+				const posX = (macos.screen.width / 2 + findAppFromList.component.width / 2) / 2;
 				const posY =
-					((kernel.screen.height - maxYOffset) / 2 + findAppFromList.component.height / 2) / 3;
+					((macos.screen.height - maxYOffset) / 2 + findAppFromList.component.height / 2) / 3;
 
 				const newData: ApplicationState = {
 					state: 'open',
@@ -283,20 +280,20 @@
 		}
 	}}
 />
-<DesktopMenuContext {kernel} />
+<DesktopMenuContext {macos} />
 <StatusbarContext
 	bind:this={statusBarMenuContext}
-	{kernel}
+	{macos}
 	on:clickOutside={({ detail }) => {
 		detail();
 	}}
 />
-<SystemUiContext bind:this={systemUI} {kernel} />
+<SystemUiContext bind:this={systemUI} {macos} />
 
 <div in:fadeIn out:fadeOut class="main-layout w-screen h-screen relative">
 	<Launchpad
 		bind:this={launchpad}
-		{kernel}
+		{macos}
 		on:clickOutside={({ detail }) => {
 			launchpad.hide();
 			statusBar.show();
@@ -307,7 +304,7 @@
 	<Statusbar
 		bind:this={statusBar}
 		applicationContext={$currentApplication}
-		{kernel}
+		{macos}
 		on:showMenuContext={({ detail }) => {
 			statusBarMenuContext.show(detail.x, detail.y, detail.contextMenu);
 		}}
@@ -317,9 +314,9 @@
 	/>
 
 	<div use:moveApp class="z-0 flex flex-col justify-between h-screen">
-		{#each kernel.applications as manifest}
-			{#await loadComponent(manifest.component.componentName) then app}
-				<DesktopContainer context={manifest} {kernel} let:width let:height>
+		{#each macos.applications as manifest}
+			{#await loadApplication(manifest) then app}
+				<DesktopContainer context={manifest} {macos} let:width let:height>
 					<svelte:component this={app.default} {width} {height} context={manifest} />
 				</DesktopContainer>
 			{/await}
