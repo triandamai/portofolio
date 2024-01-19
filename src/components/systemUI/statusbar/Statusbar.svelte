@@ -107,7 +107,7 @@
 			</div>
 
 			<div class="container-item-status-bar">
-				<Battery battery={50} class="place-self-center h-4 px-2 {$currentApplication?.size === 'max' ?'fill-white' : 'fill-gray-900 dark:fill-white'}" />
+				<Battery battery={-1} class="place-self-center h-7 px-2 {$currentApplication?.size === 'max' ?'fill-white' : 'fill-gray-900 dark:fill-white'}" />
 				<Wifi
 					state={'no-connection'}
 					class="place-self-center h-4 px-2 {$currentApplication?.size === 'max' ?'fill-white' : 'fill-gray-900 dark:fill-white'}"
@@ -115,7 +115,8 @@
 				<ActionToggle
 					class="place-self-center h-4 px-2 {$currentApplication?.size === 'max' ?'fill-white' : 'fill-gray-900 dark:fill-white'}"
 					on:click={({ detail }) => {
-						dispatcher('systemui', detail.screenX);
+						console.log(detail)
+						dispatcher('systemui', detail);
 					}}
 				/>
 				<Siri />
