@@ -102,7 +102,7 @@
 		on:click={()=>{
 			bounceEffect()
 		}}
-		class="dock-button flex flex-col place-self-center">
+		class="flex flex-col place-self-center">
 		<span style="transform: translate(0,{$bounceItem}px)">
 		<img
 			use:tooltip={appID}
@@ -120,21 +120,7 @@
 	</ButtonBase>
 </section>
 
-<style lang="scss">
-  .dock-button {
-    height: 100%;
-    width: auto !important;
-
-    cursor: default !important;
-
-    transition: all 200ms ease-in;
-
-    transform-origin: bottom;
-
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
-  }
+<style lang="postcss">
 
   .app-icon {
     width: 40.6px;

@@ -65,10 +65,10 @@
 			</div>
 			<!--			right			-->
 			<div class="flex flex-col">
+				<!-- svelte-ignore a11y-no-static-element-interactions -->
 				<div
 					class="container flex flex-row py-4 px-2"
 					on:mousedown={()=>{
-						console.log("")
 						updateTheme()
 					}}
 				>
