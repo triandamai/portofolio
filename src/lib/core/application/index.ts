@@ -27,8 +27,8 @@ export function notifyAppMinimize(target: string, width: number, height: number)
 export function notifyAppClose(target: string) {
 	applicationObserver.get(target)?.forEach((e) => e.onCloseApplication());
 }
-export function notifyAppOpen(target: string, x: number, y: number) {
-	applicationObserver.get(target)?.forEach((e) => e.onOpenApplication(x, y));
+export function notifyAppOpen(target: string, x: number, y: number, ...args: string[]) {
+	applicationObserver.get(target)?.forEach((e) => e.onOpenApplication(x, y, ...args));
 }
 
 export function notifyPositionChanged(target: string, x: number, y: number) {
@@ -42,11 +42,13 @@ export function invalidateActiveApp(data: Map<string, ApplicationState>) {
 	activeApplication.set(data);
 }
 
-export function openApplication(target: ApplicationState) {
+export function openApplication(target: ApplicationState, ...args: string[]) {
 	activeApplication.update((value) => {
 		value.set(target.context.appID, target);
 		return value;
 	});
+	changeCurrentApplication(target);
+	notifyAppOpen(target.context.appID, target.x, target.y, ...args);
 }
 export function closeApplication(target: string) {
 	activeApplication.update((e) => {

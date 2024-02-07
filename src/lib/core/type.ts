@@ -12,7 +12,7 @@ export type ApplicationListener = {
 	onMinimize: (width: number, height: number) => void;
 	onPositionChanged: (x: number, y: number) => void;
 	onStatusbarSelected: (menu: OptionsMenu) => void;
-	onOpenApplication: (x: number, y: number) => void;
+	onOpenApplication: (x: number, y: number, ...args: string[]) => void;
 	onCloseApplication: () => void;
 };
 export type DataEvent = {
