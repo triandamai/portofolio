@@ -5,6 +5,7 @@
 	import {fly} from "svelte/transition"
 
 	import DockItem from './DockItem.svelte';
+	import { dockedApp ,Host} from '$lib/core/framework/host';
 
 	const dispatcher = createEventDispatcher();
 
@@ -79,19 +80,19 @@
 				<DockItem
 					mouseX={mouseX}
 					appID="finder"
-					active={activeApplication.get('finder')?.state !== 'close'}
+					active={$dockedApp.get('finder')?.state !== 'close'}
 					on:click={onOpenFinder}
 				/>
 				{#if isDividerShow}
 					<div class="divider bg-gray-900" aria-hidden="true" />
 				{/if}
-				{#each [...activeApplication] as [key, app]}
+				{#each [...$dockedApp] as [key, app]}
 					{#if key !== 'finder' && key !== 'about'}
 						<DockItem
 							mouseX={mouseX}
-							appID={app.context.appID}
-							active={activeApplication.get(key)?.state !== 'close'}
-							on:click={()=>{onItemClick(app.context)}}
+							appID={app.applicationInfo.applicationId}
+							active={Host.getCurrentApplication()?.getApplicationInfo().applicationId === app.applicationInfo.applicationId}
+							on:click={()=>{onItemClick(app)}}
 						/>
 					{/if}
 				{/each}

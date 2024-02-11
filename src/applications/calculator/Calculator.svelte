@@ -1,9 +1,6 @@
 <script lang="ts">
-	
-	import { closeApplication, minimizeApplication } from '$lib/core/system/macos';
 	import type { Application, OptionsMenu } from '$lib/core/type';
 	import { SvelteComponent, type ComponentType, onMount } from 'svelte';
-	import { registerReceiver, unregisterReceiver } from '$lib/core/application';
 
 	import Cupertino from '../../components/framework/Cupertino.svelte';
 	import TrafficLight from '../../components/systemUI/TrafficLight.svelte';
@@ -209,29 +206,9 @@
 	}
 
 	onMount(() => {
-		registerReceiver(context.appID, {
-			onMaximize: function (width: number, height: number, x: number, y: number): void {
-				console.log('Function not implemented. maximize');
-			},
-			onMinimize: function (width: number, height: number): void {
-				console.log('Function not implemented. minimize');
-			},
-			onPositionChanged: function (x: number, y: number): void {
-				console.log('Function not implemented. position changed');
-			},
-			onStatusbarSelected: function (menu: OptionsMenu): void {
-				console.log('Function not implemented. status bar selected');
-			},
-			onOpenApplication: function (): void {
-				console.log('Function not implemented. opening');
-			},
-			onCloseApplication: function (): void {
-				console.log('Function not implemented. closing');
-			}
-		});
 
 		return () => {
-			unregisterReceiver(context.appID);
+
 		};
 	});
 </script>
@@ -239,8 +216,8 @@
 <Cupertino appWidth={width} appHeight={height} {context}>
 	<TrafficLight
 		slot="appbar"
-		on:close={(e) => closeApplication(context)}
-		on:minimize={(e) => minimizeApplication(context)}
+		on:close={(e) => {}}
+		on:minimize={(e) =>{}}
 	/>
 	<div class="h-full w-full overflow-y-scroll flex flex-col">
 		<div class="px-4 w-full flex flex-row place-content-end" style="height:50px;">

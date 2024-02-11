@@ -1,11 +1,7 @@
 <script lang="ts">
-	import type { OsKernel } from '$lib/core/type';
-
 	import MenuContext from '../../framework/MenuContext.svelte';
 	import MenuContextItem from '../../framework/MenuContextItem.svelte';
 
-
-	export let macos: OsKernel;
 
 	let contextMenu: MenuContext;
 </script>
@@ -20,7 +16,6 @@
 />
 <MenuContext
 	bind:this={contextMenu}
-	macos={macos}
 	on:clickOutside={({detail})=>{
 		detail()
 	}}

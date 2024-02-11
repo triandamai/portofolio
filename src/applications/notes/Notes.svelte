@@ -1,6 +1,5 @@
 <script lang="ts">
 	import type { Application } from '$lib/core/type';
-	import {minimizeApplication,maximizeApplication, closeApplication } from '$lib/core/system/macos';
 	
 	import Cupertino from '../../components/framework/Cupertino.svelte';
 	import TrafficLight from '../../components/systemUI/TrafficLight.svelte';
@@ -20,9 +19,9 @@
 >
 	<TrafficLight
 		slot="appbar"
-		on:close={e=>closeApplication(context)}
-		on:minimize={e=>minimizeApplication(context)}
-		on:maximize={e=>maximizeApplication(context)}
+		on:close={e=>{}}
+		on:minimize={e=>{}}
+		on:maximize={e=>{}}
 	/>
 
 	<div

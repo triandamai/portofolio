@@ -1,6 +1,15 @@
+<script>
+import BaseIcon from '../BaseIcon.svelte';
+</script>
+
+<BaseIcon
+	{...$$props}
+	on:click
+>
 <svg
 	viewBox="0 0 24 24"
 	class="fill-gray-900 dark:fill-white"
+	{...$$props}
 	width="30px"
 	xmlns="http://www.w3.org/2000/svg"
 >
@@ -9,3 +18,4 @@
 		stroke-linecap="round"
 		stroke-linejoin="round" />
 </svg>
+</BaseIcon>

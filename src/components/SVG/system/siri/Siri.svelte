@@ -1,4 +1,12 @@
-<svg class="place-self-center shadow-md h-5 m-1" viewBox="0 0 504 504" fill="none" xmlns="http://www.w3.org/2000/svg">
+<script>
+import BaseIcon from '../BaseIcon.svelte';
+</script>
+
+<BaseIcon
+	{...$$props}
+	on:click
+>
+<svg class="place-self-center shadow-md h-5 m-1" {...$$props} viewBox="0 0 504 504" fill="none" xmlns="http://www.w3.org/2000/svg">
 	<g filter="url(#filter0_d_1_311)">
 		<path d="M448.581 232.79C448.581 341.474 360.475 429.58 251.79 429.58C143.106 429.58 55.0002 341.474 55.0002 232.79C55.0002 124.106 143.106 36 251.79 36C360.475 36 448.581 124.106 448.581 232.79Z" fill="#081939"/>
 		<path d="M448.581 232.79C448.581 341.474 360.475 429.58 251.79 429.58C143.106 429.58 55.0002 341.474 55.0002 232.79C55.0002 124.106 143.106 36 251.79 36C360.475 36 448.581 124.106 448.581 232.79Z" fill="url(#paint0_radial_1_311)" fill-opacity="0.9"/>
@@ -101,3 +109,4 @@
 		</linearGradient>
 	</defs>
 </svg>
+</BaseIcon>

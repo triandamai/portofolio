@@ -1,17 +1,12 @@
 <script lang="ts">
-	import { MacOs } from '$lib/core/system/macos';
-	import type { OsKernel } from '$lib/core/type';
-
 	import AppleLogo from '../../SVG/system/logo/AppleLogo.svelte';
-	import MenuContext from '../../framework/MenuContext.svelte';
+	import { host } from '$lib/core/framework/host';
+	import StatusbarMenuContext from '../../framework/StatusbarMenuContext.svelte';
 
-	let menuContext: MenuContext;
-	export let macos:OsKernel
-
-	const {changeTheme} = MacOs()
+	let menuContext: StatusbarMenuContext;
 
 	function updateTheme(){
-		changeTheme()
+		host.changeTheme(true)
 	}
 
 
@@ -24,9 +19,8 @@
 	}
 
 </script>
-<MenuContext
+<StatusbarMenuContext
 	bind:this={menuContext}
-	macos={macos}
 	rounded="rounded-2xl"
 	on:clickOutside={({detail})=>{
 		detail()
@@ -108,7 +102,7 @@
 			</div>
 		</div>
 	</div>
-</MenuContext>
+</StatusbarMenuContext>
 <style lang="postcss">
 	.container{
 			@apply  backdrop-blur-[100px] bg-white/30 dark:bg-gray-600 dark:bg-opacity-40 dark:border-gray-700 shadow-md m-0.5 rounded-xl;

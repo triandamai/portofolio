@@ -3,7 +3,7 @@
 	import { spring, tweened } from 'svelte/motion';
 	import { tooltip } from '$lib/utils/tooltip';
 	import { browser } from '$app/environment';
-	import { createEventDispatcher } from 'svelte';
+	import { createEventDispatcher, onMount } from 'svelte';
 	import { sineInOut } from 'svelte/easing';
 
 	import ButtonBase from './ButtonBase.svelte';
@@ -95,6 +95,10 @@
 	}
 
 	$: req(mouseX);
+
+	onMount(()=>{
+
+	})
 
 </script>
 

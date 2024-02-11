@@ -1,16 +1,15 @@
 <script lang="ts">
 	import { clickOutside } from '$lib/utils/clickoutside';
 	import { fadeIn, fadeOut } from '$lib/utils/fade';
-	import { createEventDispatcher, onMount } from 'svelte';
-	import type { OsKernel } from '$lib/core/type';
+	import { createEventDispatcher } from 'svelte';
+	import { host } from '$lib/core/framework/host';
+	import { browser } from '$app/environment';
 
 	let dispatcher = createEventDispatcher();
 	let isShow: boolean = false;
 	let positionX: number = 100;
 	let positionY: number = 100;
 	export let rounded: string = 'rounded-md';
-
-	export let macos: OsKernel;
 
 	let element: HTMLDivElement;
 
@@ -34,11 +33,14 @@
 	function measurePosition(x: number, y: number, el: HTMLDivElement) {
 		//calculate left position
 		if (!el) return;
-		const screenW = macos.screen.width;
+		let screenW = host.getWidth();
+		if(browser){
+			screenW = document.documentElement.clientWidth
+		}
 		const elementW = el.clientWidth;
 		const rightSideElement = x + elementW;
 		if (rightSideElement >= screenW) {
-			if (positionY > macos.screen.maxYOffset) {
+			if (positionY < 28) {
 				//menu context
 				positionX = normalize(rightSideElement, elementW, screenW);
 			} else {

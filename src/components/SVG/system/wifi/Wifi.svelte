@@ -1,7 +1,12 @@
 <script lang="ts">
+	import BaseIcon from '../BaseIcon.svelte';
+
 	export let state: 'full' | 'no-connection' = 'full';
 </script>
-
+<BaseIcon
+	{...$$props}
+	on:click
+>
 {#if state === 'full'}
 	<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 56 56" {...$$props}
 		><path
@@ -15,3 +20,4 @@
 		/></svg
 	>
 {/if}
+</BaseIcon>

@@ -1,11 +1,11 @@
 <script lang="ts">
-import { createEventDispatcher } from 'svelte';
-
-const dispatcher = createEventDispatcher()
+import BaseIcon from '../BaseIcon.svelte';
 </script>
-<!-- svelte-ignore a11y-no-static-element-interactions -->
+<BaseIcon
+	{...$$props}
+	on:click
+>
 <svg
-	on:click={()=>{dispatcher("click",{})}}
 	xmlns="http://www.w3.org/2000/svg"
 	viewBox="0,0,256,256" class="fill-gray-900 dark:fill-white" {...$$props}>
 	<g fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter"
@@ -17,3 +17,4 @@ const dispatcher = createEventDispatcher()
 		</g>
 	</g>
 </svg>
+</BaseIcon>

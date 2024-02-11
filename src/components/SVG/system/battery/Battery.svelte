@@ -1,7 +1,13 @@
 <script lang="ts">
+	import BaseIcon from '../BaseIcon.svelte';
+
 	export let battery: number = 50;
 </script>
 
+<BaseIcon
+	{...$$props}
+	on:click
+>
 {#if battery <= 100}
 	<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 56 56" {...$$props}
 		><path
@@ -21,3 +27,4 @@
 		/></svg
 	>
 {/if}
+</BaseIcon>

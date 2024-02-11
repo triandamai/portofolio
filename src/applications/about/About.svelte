@@ -2,7 +2,6 @@
 	import type { Application } from '$lib/core/type';
 	import Cupertino from '../../components/framework/Cupertino.svelte';
 	import TrafficLight from '../../components/systemUI/TrafficLight.svelte';
-	import { closeApplication, minimizeApplication } from '$lib/core/system/macos';
 
 	export let width: number;
 	export let height: number;
@@ -12,8 +11,8 @@
 <Cupertino appWidth={width} appHeight={height} {context} on:enableMove on:windowActive>
 	<TrafficLight
 		slot="appbar"
-		on:close={(e) => closeApplication(context)}
-		on:minimize={(e) => minimizeApplication(context)}
+		on:close={(e) => {}}
+		on:minimize={(e) => {}}
 		on:maximize={(e) => {}}
 	/>
 	<div class="flex flex-col">

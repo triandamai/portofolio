@@ -1,23 +1,3 @@
-export type RootListener = {
-	onEnableMoveApp: (target: Application) => void;
-	onAppActiveChanged: (target: Application) => void;
-	openApp: (target: Application) => void;
-	closeApp: (target: Application) => void;
-	minimizeApp: (target: Application) => void;
-	maximizeApp: (target: Application) => void;
-};
-
-export type ApplicationListener = {
-	onMaximize: (width: number, height: number, x: number, y: number) => void;
-	onMinimize: (width: number, height: number) => void;
-	onPositionChanged: (x: number, y: number) => void;
-	onStatusbarSelected: (menu: OptionsMenu) => void;
-	onOpenApplication: (x: number, y: number, ...args: string[]) => void;
-	onCloseApplication: () => void;
-};
-export type DataEvent = {
-	[key: string]: DataEvent;
-};
 export type ApplicationState = {
 	z: number;
 	context: Application;
@@ -49,22 +29,19 @@ export type Frame = {
 	useDefaultPlatform: boolean;
 	fixedSize: boolean;
 };
-export type Application = {
-	name: string;
-	author: string;
-	appID: string;
-	component: Frame;
-	state: 'open' | 'quit';
-	tools: Array<Toolbar>;
-	isDocked: boolean;
+
+export type Activity = {
+	componentName: string;
+	width: number;
+	height: number;
+	useDefaultPlatform: boolean;
+	fixedSize: boolean;
 };
-export type OsKernel = {
-	isDark: boolean;
-	applications: Array<Application>;
-	docked_app: Array<string>;
-	toolbar: Array<Toolbar>;
-	toolbarSystem: Array<Toolbar>;
-	menuToolbarSystem: Array<OptionsMenu>;
-	screen: Window;
-	wallpaper: string;
+
+export type ApplicationManifest = {
+	applicationName: string;
+	applicationId: string;
+	author: string;
+	activity: Activity;
+	state: 'open' | 'quit';
 };

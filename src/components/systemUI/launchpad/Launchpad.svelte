@@ -2,14 +2,13 @@
 	import { fadeIn, fadeOut } from '$lib/utils/fade';
 	import { clickOnNoElementId } from '$lib/utils/clickOnNoElementId';
 	import { createEventDispatcher } from 'svelte';
-	import type { OsKernel } from '$lib/core/type';
 
 	import ButtonBase from '../dock/ButtonBase.svelte';
+	import { Host } from '$lib/core/framework/host';
 
 	const dispatcher = createEventDispatcher();
 	let isShow: boolean = false;
 
-	export let macos: OsKernel;
 
 	export function show() {
 		if (!isShow) {
@@ -73,22 +72,22 @@
 					class="flex flex-row flex-wrap place-content-start overflow-y-hidden"
 					style="height: 80vh; width: 70%;"
 				>
-					{#each macos.applications as app}
-						{#if app.appID !== 'about'}
+					{#each [...Host.getApplicationList()] as [_,app]}
+						{#if app.getApplicationInfo().applicationId !== 'about'}
 							<ButtonBase
-								id={app.appID}
+								id={app.getApplicationInfo().applicationId}
 								on:click={() => {
 									dispatcher('click', app);
 								}}
 								class="dock-button flex flex-col place-self-center"
 							>
 								<img
-									id={`image-${app.appID}`}
+									id={`image-${app.getApplicationInfo().applicationId}`}
 									class="app-icon h-[100px] w-[100px] m-4"
-									src="/app-icons/{app.appID}/256.png"
+									src="/app-icons/{app.getApplicationInfo().applicationId}/256.png"
 									alt=""
 								/>
-								<p id={`name-${app.appID}`} class="text-white font-sf-light">{app.name}</p>
+								<p id={`name-${app.getApplicationInfo().applicationId}`} class="text-white font-sf-light">{app.getApplicationInfo().applicationName}</p>
 							</ButtonBase>
 						{/if}
 					{/each}

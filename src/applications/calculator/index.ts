@@ -1,21 +1,28 @@
-import { MacOs } from '$lib/core/system/macos';
+import { Application } from '$lib/core/framework/framework';
 
-const { createAppConfig, createOptionsMenu, createToolbar, createFrameConfig } = MacOs();
-
-createAppConfig({
-	appName: 'Calculator',
-	appID: 'calculator',
-	author: 'Trian Damai',
-	component: createFrameConfig({
-		componentName: 'Calculator',
-		width: 300,
-		height: 400,
-		useDefaultPlatform: true,
-		fixedSize: false
-	}),
-	openWhenStarting: false,
-	toolbar: createToolbar({
-		name: 'Calculator',
-		contextMenu: createOptionsMenu(['About Notes'], ['Settings...'], ['Hide Note', 'Close Note'])
-	})
-});
+Application.register({
+		applicationName: 'Calculator',
+		applicationId: 'calculator',
+		author: 'Trian Damai',
+		activity: {
+			componentName: 'Calculator',
+			width: 300,
+			height: 400,
+			useDefaultPlatform: true,
+			fixedSize: false
+		},
+		toolbar: [
+			{
+				name:"File",
+				contextMenu:[
+					{
+						name:"New File",
+						type:"button"
+					}
+				]
+			}
+		],
+		menubar: []
+	},
+	false
+);

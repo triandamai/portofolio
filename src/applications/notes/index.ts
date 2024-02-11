@@ -1,21 +1,28 @@
-import { MacOs } from '$lib/core/system/macos';
+import { Application } from '$lib/core/framework/framework';
 
-const { createAppConfig, createOptionsMenu, createToolbar, createFrameConfig } = MacOs();
-
-createAppConfig({
-	appName: 'Notes',
-	appID: 'notes',
-	author: 'Trian Damai',
-	component: createFrameConfig({
-		componentName: 'Notes',
-		width: 600,
-		height: 400,
-		useDefaultPlatform: true,
-		fixedSize: false
-	}),
-	openWhenStarting: false,
-	toolbar: createToolbar({
-		name: 'Notes',
-		contextMenu: createOptionsMenu(['About Notes'], ['Settings...'], ['Hide Note', 'Close Note'])
-	})
-});
+Application.register({
+		applicationName: 'Notes',
+		applicationId: 'notes',
+		author: 'Trian Damai',
+		activity: {
+			componentName: 'Notes',
+			width: 700,
+			height: 400,
+			useDefaultPlatform: true,
+			fixedSize: false
+		},
+		toolbar: [
+			{
+				name:"File",
+				contextMenu:[
+					{
+						name:"New File",
+						type:"button"
+					}
+				]
+			}
+		],
+		menubar: []
+	},
+	false
+);
