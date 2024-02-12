@@ -1,9 +1,8 @@
 <script lang="ts">
-	import type { Application } from '$lib/core/type';
+	import type { Application } from '$lib/core/framework/application';
 	
 	import Cupertino from '../../components/framework/Cupertino.svelte';
-	import TrafficLight from '../../components/systemUI/TrafficLight.svelte';
-	
+
 	export let width:number
 	export let height:number
 	export let context:Application
@@ -11,19 +10,12 @@
 </script>
 
 <Cupertino
-	style={'basic-sidebar'}
+	layout={'basic-sidebar'}
 	appWidth={width}
 	appHeight={height}
 	context={context}
 	
 >
-	<TrafficLight
-		slot="appbar"
-		on:close={e=>{}}
-		on:minimize={e=>{}}
-		on:maximize={e=>{}}
-	/>
-
 	<div
 		slot="sidebar"
 		class="px-2"

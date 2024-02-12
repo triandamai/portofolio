@@ -1,4 +1,4 @@
-import { Application } from '$lib/core/framework/framework';
+import { Application } from '$lib/core/framework/application';
 
 Application.register({
 		applicationName: 'Calculator',

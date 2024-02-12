@@ -1,7 +1,25 @@
 import type { Activity, ApplicationManifest, OptionsMenu, Toolbar } from '$lib/core/type';
-import { dockedApp, Host, host } from '$lib/core/framework/host';
+import { Host } from '$lib/core/framework/host';
 
 let oldYPosition: number = 0;
+
+export interface OnTrafficLightCallbackListener {
+	onRed: () => void;
+	onYellow: () => void;
+	onGreen: () => void;
+}
+
+export type SizeChangeCallbackListener = (
+	width: number,
+	height: number,
+	x: number,
+	y: number
+) => void;
+
+export type MoveListener = (x: number, y: number) => void;
+export type ScreenApp = 'full' | 'relative';
+export type ApplicationState = 'open' | 'close' | 'hidden';
+export type ScreenChangeListener = (screen: ScreenApp) => void;
 
 export class Application {
 	private readonly applicationInfo: ApplicationManifest | null = null;
@@ -9,27 +27,20 @@ export class Application {
 	private menubar: Array<OptionsMenu> = [];
 	private showListener: Map<string, () => void> = new Map<string, () => void>();
 	private hideListener: Map<string, () => void> = new Map<string, () => void>();
-	private sizeChangedListener: Map<
-		string,
-		(w: number, height: number, x: number, y: number) => void
-	> = new Map<string, (w: number, height: number, x: number, y: number) => void>();
-	private onApplicationMoveListener: Map<string, (w: number, height: number) => void> = new Map<
-		string,
-		(w: number, height: number) => void
-	>();
+	private sizeChangedListener: Map<string, SizeChangeCallbackListener> = new Map();
+	private onApplicationMoveListener: Map<string, MoveListener> = new Map();
 	private onZIndexChangeListener: () => void = function () {};
-	private onFullScreenChangeListener: Map<string, (fullscreen: boolean) => void> = new Map<
-		string,
-		(full: boolean) => void
-	>();
+	private onFullScreenChangeListener: Map<string, ScreenChangeListener> = new Map();
+	private onTrafficLightListener:Map<string,OnTrafficLightCallbackListener>= new Map();
 
 	z: number = 0;
-	state: 'open' | 'close' | 'hidden' = 'close';
-	screen: 'full' | 'relative' = 'relative';
-	width: number = host.getWidth();
-	height: number = host.getHeight();
+	state: ApplicationState = 'close';
+	screen: ScreenApp = 'relative';
+	width: number = Host.systemManager().getWidth();
+	height: number = Host.systemManager().getHeight();
 	x: number = 0;
 	y: number = 30;
+	isPinnedToDock: boolean = false;
 
 	constructor(options: ApplicationManifest, toolbar: Array<Toolbar>, menubar: Array<OptionsMenu>) {
 		this.applicationInfo = options;
@@ -67,20 +78,17 @@ export class Application {
 		//set default position to center
 		const w = app.width / 2;
 		const h = app.height / 2;
-		const yPos = host.getHeight() / 3 - h;
+		const yPos = Host.systemManager().getHeight() / 3 - h;
 
-		app.x = host.getWidth() / 2 - w;
+		app.x = Host.systemManager().getWidth() / 2 - w;
 		if (yPos >= 28) {
 			app.y = yPos;
 		}
 
 		if (pinToDock) {
-			dockedApp.update((value) => {
-				value.set(opt.applicationId, app);
-				return value;
-			});
+			Host.dockManager().setOrUpdateDock(app);
 		}
-		Host.setApplication(opt.applicationId, app);
+		Host.appManager().setOrUpdateListApplication(app);
 	}
 
 	getInstance(): Application {
@@ -93,22 +101,20 @@ export class Application {
 
 	openApplication() {
 		if (this.applicationInfo === null) return;
-		Host.openApplication(this.applicationInfo.applicationId, this.getInstance());
-		dockedApp.update((dock) => {
-			dock.set(this.applicationInfo!.applicationId, this.getInstance());
-			return dock;
-		});
+		Host.appManager().openApplication(this.getInstance());
+		Host.dockManager().setOrUpdateDock(this.getInstance());
 		this.showApplication();
+		if(this.getIsFullScreen()){
+			this.enterFullScreen()
+		}
 	}
 
 	closeApplication() {
 		if (this.applicationInfo === null) return;
-		Host.closeApplication(this.applicationInfo.applicationId);
-		dockedApp.update((dock) => {
-			dock.delete(this.getInstance().applicationInfo?.applicationId ?? '');
-			return dock;
-		});
+		Host.appManager().closeApplication(this.getInstance());
+		Host.dockManager().removeApplicationFromDock(this.getInstance());
 		this.hideApplication();
+		this.exitFullScreen()
 	}
 
 	moveApplication(e: MouseEvent, maxYOffset: number) {
@@ -132,6 +138,9 @@ export class Application {
 			this.y = posY;
 			this.onApplicationMoveListener.forEach((cb) => cb(this.x, this.y));
 		}
+	}
+	addOnTrafficLightListener(key:'desktop'|'app'|'cupertino',listener:OnTrafficLightCallbackListener){
+		this.onTrafficLightListener.set(key,listener)
 	}
 
 	addOnMoveListener(key: 'desktop' | 'app', listener: (x: number, y: number) => void) {
@@ -159,27 +168,25 @@ export class Application {
 	addOnZIndexChangeListener(listener: () => void) {
 		this.onZIndexChangeListener = listener;
 	}
-	addOnFullScreenChangeListener(
-		key: 'desktop' | 'app' | 'cupertino',
-		listener: (isFullScreen: boolean) => void
-	) {
+
+	addOnScreenChangeListener(key: 'desktop' | 'app' | 'cupertino', listener: ScreenChangeListener) {
 		this.onFullScreenChangeListener.set(key, listener);
 	}
 
 	enterFullScreen() {
-		const w = host.getWidth();
-		const h = host.getHeight();
+		const w = Host.systemManager().getWidth();
+		const h = Host.systemManager().getHeight();
 		this.sizeChangedListener.forEach((cb) => cb(w, h, 0, 0));
 		this.screen = 'full';
-		host.notifyIsAppInFullScreen(true);
-		this.onFullScreenChangeListener.forEach((cb) => cb(true));
+		Host.appManager().setFullscreen(true);
+		this.onFullScreenChangeListener.forEach((listener) => listener(this.screen));
 	}
 
 	exitFullScreen() {
 		this.sizeChangedListener.forEach((cb) => cb(this.width, this.height, this.x, this.y));
 		this.screen = 'relative';
-		host.notifyIsAppInFullScreen(false);
-		this.onFullScreenChangeListener.forEach((cb) => cb(false));
+		Host.appManager().setFullscreen(false);
+		this.onFullScreenChangeListener.forEach((listener) => listener(this.screen));
 	}
 
 	showApplication() {
@@ -192,6 +199,19 @@ export class Application {
 		if (this.hideListener) {
 			this.hideListener.forEach((cb) => cb());
 		}
+	}
+
+	onRedClicked(){
+		this.closeApplication()
+		this.onTrafficLightListener.forEach(listener=>listener.onRed())
+	}
+
+	onYellowClicked(){
+		this.onTrafficLightListener.forEach(listener=>listener.onYellow())
+	}
+
+	onGreenClicked(){
+		this.onTrafficLightListener.forEach(listener=>listener.onGreen())
 	}
 
 	getToolbar(): Array<Toolbar> {

@@ -9,13 +9,13 @@
 </script>
 
 <div id={uniq} class="min-w-max max-w-min px-2 py-2 container flex flex-row">
-	<button class="close-light p-0.5" on:click={() => dispatcher('close', {})}>
+	<button class="close-light p-0.5" on:click={() => dispatcher('red', {})}>
 		<CloseSVG />
 	</button>
-	<button class="minimize-light p-1" on:click={()=> dispatcher('minimize', {})}>
+	<button class="minimize-light p-1" on:click={()=> dispatcher('yellow', {})}>
 		<MinimizeSVG />
 	</button>
-	<button class="stretch-light" on:click={()=> dispatcher('maximize', {})}>
+	<button class="stretch-light" on:click={()=> dispatcher('green', {})}>
 		<StretchSVG />
 	</button>
 </div>

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { fadeIn, fadeOut } from '$lib/utils/fade';
 	import { clickOnNoElementId } from '$lib/utils/clickOnNoElementId';
-	import { createEventDispatcher } from 'svelte';
+	import { createEventDispatcher, onMount } from 'svelte';
 
 	import ButtonBase from '../dock/ButtonBase.svelte';
 	import { Host } from '$lib/core/framework/host';
@@ -9,20 +9,15 @@
 	const dispatcher = createEventDispatcher();
 	let isShow: boolean = false;
 
+	onMount(()=>{
+		Host.launchpadManager().addOnLaunchpadVisibilityChangedListener('launchpad',(show)=>{
+			isShow = show
+		})
 
-	export function show() {
-		if (!isShow) {
-			isShow = true;
+		return ()=>{
+			Host.launchpadManager().removeLaunchpadVisibilityChangedListener('launchpad')
 		}
-	}
-
-	export function displayed() {
-		return isShow;
-	}
-
-	export function hide() {
-		isShow = false;
-	}
+	})
 </script>
 
 {#if isShow}
@@ -30,7 +25,7 @@
 		use:clickOnNoElementId={{
 			callback: () => {
 				dispatcher('clickOutside', () => {
-					hide();
+					Host.launchpadManager().hideLaunchpad()
 				});
 			}
 		}}
@@ -72,7 +67,7 @@
 					class="flex flex-row flex-wrap place-content-start overflow-y-hidden"
 					style="height: 80vh; width: 70%;"
 				>
-					{#each [...Host.getApplicationList()] as [_,app]}
+					{#each Array.from(Host.appManager().getListApplication().values()) as app}
 						{#if app.getApplicationInfo().applicationId !== 'about'}
 							<ButtonBase
 								id={app.getApplicationInfo().applicationId}

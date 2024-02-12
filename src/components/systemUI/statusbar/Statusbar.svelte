@@ -11,7 +11,7 @@
 	import ActionToggle from '../../SVG/system/action/ActionToggle.svelte';
 	import AppleLogo from '../../SVG/system/logo/AppleLogo.svelte';
 	import { Host, host } from '$lib/core/framework/host';
-	import type { Application } from '$lib/core/framework/framework';
+	import type { Application } from '$lib/core/framework/application';
 	import TrafficLight from '../TrafficLight.svelte';
 
 	const dispatcher = createEventDispatcher();
@@ -19,19 +19,7 @@
 	let isShow: boolean = true;
 	let toolbar: Array<Toolbar> = [];
 	let isFullScreen: boolean = false;
-
-	export let currentApplication: Application | null;
-
-	export function show() {
-		if (!isShow) {
-			isShow = true;
-		}
-		isFullScreen = host.getFullScreenMode();
-	}
-
-	export function hide() {
-		isShow = false;
-	}
+	let activeApplication: Application | null;
 
 	export function getStatusbarInfo(): { x: number; y: number; height: number; isShow: boolean } {
 		if (statusbar) {
@@ -62,15 +50,24 @@
 		});
 	}
 
+
 	onMount(() => {
-		isShow = true;
-		host.addOnCurrentApplicationChangeListener('statusbar', (target) => {
-			currentApplication = target;
-			toolbar = target.getToolbar();
+		activeApplication = Host.appManager().getActiveApplication();
+		isFullScreen = Host.appManager().getIsFullscreenMode();
+		Host.appManager().addOnActiveApplicationChangeListener('statusbar', (app) => {
+			activeApplication = app;
 		});
+		Host.appManager().addOnFullscreenModeChangeListener('statusbar', (fullscreen) => {
+			isFullScreen = fullscreen;
+		});
+		Host.statusbarManager().addOnStatusbarVisibilityChangedListener('statusbar',(show)=>{
+			isShow = show
+		})
 
 		return () => {
-			host.removeCurrentApplicationChangeListener('statusbar');
+			Host.appManager().removeOnActiveApplicationChangeListener('statusbar');
+			Host.appManager().removeFullscreenModeChangeListener('statusbar');
+			Host.statusbarManager().removeStatusbarVisibilityChangedListener("statusbar")
 		};
 	});
 </script>
@@ -92,30 +89,30 @@
 		bind:this={statusbar}
 		class="container-status-bar"
 	>
-		<div class={currentApplication?.screen === 'full' ? 'bg-status-bar-max' : 'bg-status-bar'}>
+		<div class={activeApplication?.screen === 'full' ? 'bg-status-bar-max' : 'bg-status-bar'}>
 			<div class="container-item-status-bar">
 				<AppleLogo
 					on:click={showSystemContextMenu}
-					class="h-5 mx-2 place-self-center {currentApplication?.size === 'full'
+					class="h-5 mx-2 place-self-center {isFullScreen
 						? 'fill-white'
 						: 'fill-gray-900 dark:fill-white'}"
 				/>
 				<button
 					on:click={(e) => {
-						showContextMenu(e, currentApplication?.getMenubar());
+						showContextMenu(e, activeApplication?.getMenubar());
 					}}
-					class={currentApplication?.size === 'full'
+					class={isFullScreen
 						? 'active-application-max'
 						: 'active-application '}
 					type="button"
 				>
-					{currentApplication?.getApplicationInfo()?.applicationName ?? ''}
+					{activeApplication?.getApplicationInfo()?.applicationName ?? ''}
 				</button>
 
 				{#each toolbar as tool}
 					<button
 						on:click={(e) => showContextMenu(e, tool.contextMenu)}
-						class={currentApplication?.size === 'full' ? 'item-status-bar-max' : 'item-status-bar'}
+						class={isFullScreen ? 'item-status-bar-max' : 'item-status-bar'}
 						type="button"
 					>
 						{tool.name}
@@ -126,18 +123,18 @@
 			<div class="container-item-status-bar">
 				<Battery
 					battery={-1}
-					class="place-self-center h-7 px-2 {currentApplication?.size === 'full'
+					class="place-self-center h-7 px-2 {isFullScreen
 						? 'fill-white'
 						: 'fill-gray-900 dark:fill-white'}"
 				/>
 				<Wifi
 					state={'no-connection'}
-					class="place-self-center h-4 px-2 {currentApplication?.size === 'full'
+					class="place-self-center h-4 px-2 {isFullScreen
 						? 'fill-white'
 						: 'fill-gray-900 dark:fill-white'}"
 				/>
 				<ActionToggle
-					class="place-self-center h-4 px-2 {currentApplication?.size === 'full'
+					class="place-self-center h-4 px-2 {isFullScreen
 						? 'fill-white'
 						: 'fill-gray-900 dark:fill-white'}"
 					on:click={({ detail }) => {
@@ -146,7 +143,7 @@
 				/>
 				<Siri />
 				<StatusbarTime
-					textColor={currentApplication?.size === 'full'
+					textColor={isFullScreen
 						? 'text-white'
 						: 'text-gray-900 dark:text-white'}
 				/>
@@ -155,16 +152,14 @@
 		{#if isFullScreen}
 			<div class="bg-gray-400 w-screen h-full">
 				<TrafficLight
-					on:close={(e) => {
-						Host.getCurrentApplication()?.closeApplication();
+					on:red={() => {
+						Host.appManager().getActiveApplication()?.onRedClicked()
 					}}
-					on:minimize={(e) => {}}
-					on:maximize={(e) => {
-						if (host.getFullScreenMode()) {
-							Host.getCurrentApplication()?.exitFullScreen();
-						} else {
-							Host.getCurrentApplication()?.enterFullScreen();
-						}
+					on:yellow={() => {
+						Host.appManager().getActiveApplication()?.onYellowClicked()
+					}}
+					on:green={() => {
+						Host.appManager().getActiveApplication()?.onGreenClicked()
 					}}
 				/>
 			</div>
@@ -173,35 +168,35 @@
 {/if}
 
 <style lang="postcss">
-	.container-status-bar {
-		@apply fixed z-10 h-7 w-screen top-0 left-0 shadow-2xl blur-0 flex flex-col;
-	}
+    .container-status-bar {
+        @apply fixed z-10 h-7 w-screen top-0 left-0 shadow-2xl blur-0 flex flex-col;
+    }
 
-	.bg-status-bar {
-		@apply backdrop-blur-md bg-white/30 w-screen h-full flex flex-row place-content-between select-none;
-	}
+    .bg-status-bar {
+        @apply backdrop-blur-md bg-white/30 w-screen h-full flex flex-row place-content-between select-none;
+    }
 
-	.bg-status-bar-max {
-		@apply bg-gray-950 w-screen h-full flex flex-row place-content-between select-none;
-	}
+    .bg-status-bar-max {
+        @apply bg-gray-950 w-screen h-full flex flex-row place-content-between select-none;
+    }
 
-	.container-item-status-bar {
-		@apply place-self-center h-full flex flex-row;
-	}
+    .container-item-status-bar {
+        @apply place-self-center h-full flex flex-row;
+    }
 
-	.item-status-bar {
-		@apply mx-0.5 min-w-max h-full text-center text-sm font-sf-regular cursor-default focus:bg-gray-300 focus:bg-opacity-60 rounded-sm px-3 text-gray-900 dark:text-white;
-	}
+    .item-status-bar {
+        @apply mx-0.5 min-w-max h-full text-center text-sm font-sf-regular cursor-default focus:bg-gray-300 focus:bg-opacity-60 rounded-sm px-3 text-gray-900 dark:text-white;
+    }
 
-	.item-status-bar-max {
-		@apply mx-0.5 min-w-max h-full text-center text-sm font-sf-regular cursor-default focus:bg-gray-300 focus:bg-opacity-60 rounded-sm px-3 text-white;
-	}
+    .item-status-bar-max {
+        @apply mx-0.5 min-w-max h-full text-center text-sm font-sf-regular cursor-default focus:bg-gray-300 focus:bg-opacity-60 rounded-sm px-3 text-white;
+    }
 
-	.active-application {
-		@apply font-sf-bold text-xs px-2 rounded-sm focus:bg-gray-300 focus:bg-opacity-60 text-gray-900 dark:text-white;
-	}
+    .active-application {
+        @apply font-sf-bold text-xs px-2 rounded-sm focus:bg-gray-300 focus:bg-opacity-60 text-gray-900 dark:text-white;
+    }
 
-	.active-application-max {
-		@apply font-sf-bold text-xs px-2 rounded-sm focus:bg-gray-300 focus:bg-opacity-60 text-white;
-	}
+    .active-application-max {
+        @apply font-sf-bold text-xs px-2 rounded-sm focus:bg-gray-300 focus:bg-opacity-60 text-white;
+    }
 </style>

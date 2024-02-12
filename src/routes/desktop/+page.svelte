@@ -9,12 +9,10 @@
 	import Launchpad from '../../components/systemUI/launchpad/Launchpad.svelte';
 	import StatusbarContext from '../../components/systemUI/context/StatusbarContext.svelte';
 	import SystemUiContext from '../../components/systemUI/context/SystemUiContext.svelte';
-	import { host, Host } from '$lib/core/framework/host';
+	import {  Host } from '$lib/core/framework/host';
 
-	let statusBar: Statusbar;
 	let statusBarMenuContext: StatusbarContext;
-	let launchpad: Launchpad;
-	let dock: Dock;
+
 	let systemUI: SystemUiContext;
 
 	let moving: boolean = false;
@@ -23,7 +21,7 @@
 	function moveApp(_: HTMLElement) {
 		window.addEventListener('mousemove', (e: MouseEvent) => {
 			if (moving && e.offsetX > 1) {
-				Host.getCurrentApplication()?.moveApplication(e, 28);
+				Host.appManager().getActiveApplication()?.moveApplication(e, 28);
 			}
 		});
 
@@ -32,59 +30,54 @@
 		});
 	}
 
-	function enableMove() {
-		moving = true;
+	function enableMove(isEnable: boolean) {
+		moving = isEnable;
 	}
 
 	function onFullScreenMode(isFull: boolean) {
 		if (isFull) {
-			statusBar.hide();
-			dock.hide();
+			Host.statusbarManager().hideStatusbar()
+			Host.dockManager().hideDock();
 		} else {
-			statusBar.show();
-			dock.show();
+			Host.statusbarManager().showStatusbar()
+			Host.dockManager().showDock()
 		}
 	}
 
 	function onMouseHoverWhenFullScreen(yPosition: number) {
-		if (host.getFullScreenMode()) {
+		if (Host.appManager().getIsFullscreenMode()) {
 			//when mouse hover on top
-			if (yPosition <= host.getMaxYOffset() * 2) {
-				if (!statusBar.getStatusbarInfo().isShow) {
-					statusBar.show();
+			if (yPosition <= Host.systemManager().getMaxYOffset() * 2) {
+				if (!Host.statusbarManager().getIsStatusbarShow()) {
+					Host.statusbarManager().showStatusbar()
 				}
 			} else {
-				if (statusBar.getStatusbarInfo().isShow) {
-					statusBar.hide();
+				if (Host.statusbarManager().getIsStatusbarShow()) {
+					Host.statusbarManager().hideStatusbar()
 				}
 			}
 
-			if (yPosition <= host.getHeight() - 50) {
-				dock.hide();
+			if (yPosition <= Host.systemManager().getHeight() - 50) {
+				Host.dockManager().hideDock()
 			} else {
-				dock.show();
+				Host.dockManager().showDock()
 			}
 		}
 	}
 	onMount(() => {
-		//initialize default y position for apps
-		if (statusBar) {
-			statusBar.show();
-		}
-		if (dock) {
-			dock.show();
-		}
-		host.addOnEnableMoveListener(enableMove);
-		host.addOnFullScreenChange(onFullScreenMode);
+		Host.statusbarManager().showStatusbar()
+		Host.dockManager().showDock()
+		Host.appManager().addOnMoveEnabledChangeListener('page', enableMove);
+		Host.appManager().addOnFullscreenModeChangeListener('page', onFullScreenMode);
 		return () => {};
 	});
 </script>
 
 <svelte:window
-	on:resize={(e) => {
+	on:resize={() => {
 		let screen = document.body;
-		host.setWidth(screen.clientWidth);
-		host.setHeight(screen.clientHeight);
+		Host.systemManager().setWidth(screen.clientWidth);
+		Host.systemManager().setHeight(screen.clientHeight);
 	}}
 	on:mousemove={(e) => {
 		onMouseHoverWhenFullScreen(e.y);
@@ -101,24 +94,21 @@
 
 <div in:fadeIn out:fadeOut class="main-layout w-screen h-screen relative">
 	<Launchpad
-		bind:this={launchpad}
 		on:clickOutside={() => {
-			launchpad.hide();
-			if (host.getFullScreenMode()) {
-				statusBar.hide();
+			Host.launchpadManager().hideLaunchpad()
+			if (Host.appManager().getIsFullscreenMode()) {
+				Host.statusbarManager().hideStatusbar()
 			} else {
-				statusBar.show();
+				Host.statusbarManager().showStatusbar()
 			}
 		}}
 		on:click={({ detail }) => {
-			launchpad.hide();
-			statusBar.show();
+			Host.launchpadManager().hideLaunchpad()
+			Host.statusbarManager().showStatusbar()
 			detail.openApplication();
 		}}
 	/>
 	<Statusbar
-		bind:this={statusBar}
-		currentApplication={Host.getCurrentApplication()}
 		on:showMenuContext={({ detail }) => {
 			statusBarMenuContext.show(detail.x, detail.y, detail.contextMenu);
 		}}
@@ -128,7 +118,7 @@
 	/>
 
 	<div use:moveApp class="z-0 flex flex-col justify-between h-screen">
-		{#each [...Host.getApplicationList()] as [_, manifest]}
+		{#each Array.from(Host.appManager().getListApplication().values()) as manifest}
 			{#await Host.loadApplication(manifest) then app}
 				<DesktopContainer context={manifest} let:width let:height>
 					<svelte:component this={app.default} {width} {height} context={manifest} />
@@ -137,20 +127,18 @@
 		{/each}
 	</div>
 	<Dock
-		bind:this={dock}
 		on:click={({ detail }) => {
+			Host.launchpadManager().hideLaunchpad()
 			detail.openApplication();
 		}}
 		on:finder={() => {
 			Host.findApplication('finder')?.openApplication();
 		}}
 		on:launchpad={() => {
-			if (launchpad.displayed()) {
-				launchpad.hide();
-				statusBar.show();
+			if (Host.launchpadManager().getIsLaunchpadShow()) {
+				Host.launchpadManager().hideLaunchpad()
 			} else {
-				launchpad.show();
-				statusBar.hide();
+				Host.launchpadManager().showLaunchpad()
 			}
 		}}
 	/>

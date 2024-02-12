@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { Application, OptionsMenu } from '$lib/core/type';
+	import type { Application } from '$lib/core/framework/application';
 	import { SvelteComponent, type ComponentType, onMount } from 'svelte';
 
 	import Cupertino from '../../components/framework/Cupertino.svelte';
@@ -19,7 +19,7 @@
 	const buttonSize = width / 4;
 
 	type button = {
-		operator: '+' | '-' | '=' | '/'|'-+' | '*' | ',' | '%' | 'ac' | 'btn';
+		operator: '+' | '-' | '=' | '/' | '-+' | '*' | ',' | '%' | 'ac' | 'btn';
 		text: string;
 		value: string;
 		scale: number;
@@ -213,12 +213,12 @@
 	});
 </script>
 
-<Cupertino appWidth={width} appHeight={height} {context}>
-	<TrafficLight
-		slot="appbar"
-		on:close={(e) => {}}
-		on:minimize={(e) =>{}}
-	/>
+<Cupertino
+	layout={'basic'}
+	appWidth={width}
+	appHeight={height}
+	context={context}
+>
 	<div class="h-full w-full overflow-y-scroll flex flex-col">
 		<div class="px-4 w-full flex flex-row place-content-end" style="height:50px;">
 			<span class="w-full text-end text-4xl text-white dark:text-white">0</span>

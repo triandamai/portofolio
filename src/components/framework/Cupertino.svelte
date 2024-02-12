@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { Host, host } from '$lib/core/framework/host';
-	import type { Application } from '$lib/core/framework/framework';
+	import { Host } from '$lib/core/framework/host';
+	import type { Application } from '$lib/core/framework/application';
 	import TrafficLight from '../systemUI/TrafficLight.svelte';
 
-	export let style: 'basic' | 'basic-sidebar' = 'basic';
+	export let layout: 'basic' | 'basic-sidebar' = 'basic';
 	let appbar: HTMLDivElement | undefined;
 	let header: HTMLDivElement | undefined;
 	let cupertino: HTMLDivElement | undefined;
@@ -25,11 +25,11 @@
 	function enableMove(event: MouseEvent) {
 		if ((event.target as HTMLElement).id.startsWith('traffic-light')) return;
 		windowActive();
-		host.enableMove();
+		Host.appManager().setEnableMove(true)
 	}
 
 	function windowActive() {
-		Host.openApplication(context.getApplicationInfo().applicationId, context);
+		context.openApplication()
 	}
 
 	function measureBodyHeight(width: number, height: number) {
@@ -39,8 +39,8 @@
 	}
 
 	function listenScreenChange(ctx: Application) {
-		ctx.addOnFullScreenChangeListener('cupertino', (full) => {
-			isFullScreen = full;
+		ctx.addOnScreenChangeListener('cupertino', (full) => {
+			isFullScreen = full === 'full';
 		});
 	}
 
@@ -67,7 +67,7 @@
 	id={context.getApplicationInfo().applicationId}
 	class="w-full h-full relative"
 >
-	{#if style === 'basic'}
+	{#if layout === 'basic'}
 		<!--	appbar	-->
 		<div
 			id={idAppBar}
@@ -77,24 +77,22 @@
 		>
 			{#if !isFullScreen}
 				<TrafficLight
-					on:close={(e) => {
-						context.closeApplication();
-					}}
-					on:minimize={(e) => {}}
-					on:maximize={(e) => {
-						if (host.getFullScreenMode()) {
-							context.enterFullScreen();
-						} else {
-							context.enterFullScreen();
-						}
-					}}
+					on:red={() => {
+								context.onRedClicked()
+							}}
+					on:yellow={() => {
+								context.onYellowClicked()
+							}}
+					on:green={() => {
+							context.onGreenClicked()
+							}}
 				/>
 			{/if}
 		</div>
 		<div bind:this={body} style="height: {bodyHeight}px;" class="w-full h-max select-none">
 			<slot />
 		</div>
-	{:else if style === 'basic-sidebar'}
+	{:else if layout === 'basic-sidebar'}
 		<div class="w-full h-full flex flex-row">
 			<!--			sidebar 		-->
 			<div class="flex flex-col text-sm font-sf-bold" style="width: {sideBarWidth}px;">
@@ -106,16 +104,14 @@
 				>
 					{#if !isFullScreen}
 						<TrafficLight
-							on:close={(e) => {
-								context.closeApplication();
+							on:red={() => {
+								context.onRedClicked()
 							}}
-							on:minimize={(e) => {}}
-							on:maximize={(e) => {
-								if (host.getFullScreenMode()) {
-									context.enterFullScreen();
-								} else {
-									context.enterFullScreen();
-								}
+							on:yellow={() => {
+								context.onYellowClicked()
+							}}
+							on:green={() => {
+							context.onGreenClicked()
 							}}
 						/>
 					{/if}
@@ -155,24 +151,24 @@
 </div>
 
 <style>
-	/* width */
-	::-webkit-scrollbar {
-		width: 6px;
-	}
+    /* width */
+    ::-webkit-scrollbar {
+        width: 6px;
+    }
 
-	/* Track */
-	::-webkit-scrollbar-track {
-		background: rgba(241, 241, 241, 0);
-	}
+    /* Track */
+    ::-webkit-scrollbar-track {
+        background: rgba(241, 241, 241, 0);
+    }
 
-	/* Handle */
-	::-webkit-scrollbar-thumb {
-		background: #3f3f3f;
-		border-radius: 5px;
-	}
+    /* Handle */
+    ::-webkit-scrollbar-thumb {
+        background: #3f3f3f;
+        border-radius: 5px;
+    }
 
-	/* Handle on hover */
-	::-webkit-scrollbar-thumb:hover {
-		background: #555;
-	}
+    /* Handle on hover */
+    ::-webkit-scrollbar-thumb:hover {
+        background: #555;
+    }
 </style>

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { Application } from '$lib/core/framework/framework';
+	import type { Application } from '$lib/core/framework/application';
 	import { fadeIn, fadeOut } from '$lib/utils/fade';
 	import { tweened } from 'svelte/motion';
 	import { sineInOut } from 'svelte/easing';
